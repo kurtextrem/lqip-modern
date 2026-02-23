@@ -40,30 +40,27 @@
 
       th {
         text-align: left;
-        padding: 1rem;
+        padding: 0.75rem;
       }
 
       td {
-        padding: 0;
-      }
-
-      .description {
-        padding: 1rem;
-        font-size: 0.85em;
+        padding: 0.5rem 0;
       }
 
       .selected {
         background: #0a5f0a;
       }
 
-      .processing-time img {
-        vertical-align: text-bottom;
-      }
-
       .preview-wrapper {
         position: relative;
         height: 0;
         overflow: hidden;
+      }
+
+      .preview-wrapper.is-loading .preview,
+      .preview-wrapper.is-loading .css-preview,
+      .preview-wrapper.is-loading .css-lqip-preview {
+        opacity: 0.38;
       }
 
       .preview,
@@ -86,52 +83,26 @@
       }
 
       .preview-wrapper-lqip::after {
-        content: '';
+        content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        inset: 0;
         backdrop-filter: blur(var(--css-blur, 20px));
         -webkit-backdrop-filter: blur(var(--css-blur, 20px));
         pointer-events: none;
       }
 
-      .overlay {
-        display: none;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.75);
-        color: #fff;
-        padding: 1rem;
-        font-size: 0.85em;
-        overflow: auto;
+      .size-below {
+        margin-top: 0.45rem;
+        font-size: 0.78rem;
+        color: #ddd;
       }
 
-      td:hover .overlay {
-        display: block;
+      .size-below.is-winner {
+        color: #ffe27a;
       }
 
-      .overlay table {
-        font-size: 0.95em;
-        table-layout: auto;
-      }
-
-      .overlay td,
-      .overlay th {
-        width: auto;
-        padding: 0.25rem;
-        text-align: left;
-      }
-
-      .overlay code {
-        display: block;
-        white-space: pre-wrap;
-        word-break: break-word;
-        font-family: monospace;
+      [hidden] {
+        display: none !important;
       }
 
       .loading,
@@ -141,43 +112,53 @@
 
       .controls {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 0.75rem 1rem;
-        margin: 1.5rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 0.8rem 1rem;
+        margin: 1.2rem 0;
         padding: 1rem;
         border: 1px solid #222;
         background: #111;
       }
 
-      .controls label {
-        font-size: 0.85rem;
+      .controls label,
+      .controls .group {
         display: grid;
-        gap: 0.4rem;
+        gap: 0.35rem;
+        font-size: 0.85rem;
       }
 
-      .controls select {
+      .controls select,
+      .controls input[type="range"] {
+        width: 100%;
         background: #1b1b1b;
         color: #fff;
         border: 1px solid #333;
         border-radius: 4px;
-        padding: 0.35rem 0.5rem;
       }
 
-      .controls .inline {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-      }
-
-      .controls .inline label {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
+      .controls input[type="checkbox"] {
+        margin-right: 0.35rem;
       }
 
       .controls .helper {
         color: #aaa;
         font-size: 0.75rem;
+      }
+
+      .controls .wide {
+        grid-column: 1 / -1;
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.35rem 0.7rem;
+      }
+
+      .checkbox-grid label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
       }
     </style>
   </head>
@@ -193,28 +174,18 @@
       LQIP (Low Quality Image Placeholders) generates efficient placeholder
       previews for image-heavy pages to improve perceived loading.
     </p>
-    <p>
-      This comparison focuses on modern techniques and removes older SVG/JPEG
-      placeholder methods.
-    </p>
 
     <div id="status" class="loading">Loading comparison data...</div>
 
     <div id="controls" class="controls" hidden>
       <label>
-        WebP quality
-        <select id="webp-quality"></select>
+        WebP quality <span id="webp-quality-value">50</span>
+        <input id="webp-quality" type="range" min="0" max="5" step="1" value="1" />
       </label>
 
       <label>
-        AVIF quality
-        <select id="avif-quality"></select>
-      </label>
-
-      <label>
-        Blur level
-        <select id="blur-level"></select>
-        <span class="helper">Sharp blur for encoded images, CSS blur for generated CSS placeholders.</span>
+        AVIF quality <span id="avif-quality-value">70</span>
+        <input id="avif-quality" type="range" min="0" max="5" step="1" value="2" />
       </label>
 
       <label>
@@ -225,447 +196,609 @@
         </select>
       </label>
 
-      <label>
+      <label class="sharp-only">
+        Sharp blur level
+        <select id="sharp-blur-level"></select>
+      </label>
+
+      <label class="sharp-only">
         Sharp blur target
         <select id="sharp-blur-target">
           <option value="placeholder">Apply blur on placeholder</option>
           <option value="original">Apply blur on original image</option>
         </select>
       </label>
+
+      <label>
+        CSS blur <span id="css-blur-value">20px</span>
+        <input id="css-blur" type="range" min="0" max="40" step="1" value="20" />
+        <span class="helper">Seamless live update from 0px to 40px.</span>
+      </label>
+
+      <div class="group wide sharp-only">
+        <strong>0px sharp toggles</strong>
+        <span class="helper"
+          >Only used when blur mode is sharp and sharp blur level is none.</span
+        >
+        <div class="checkbox-grid">
+          <label><input id="avif-lossless" type="checkbox" /> AVIF lossless</label>
+          <label
+            ><input id="avif-chroma-444" type="checkbox" /> AVIF chroma
+            4:4:4</label
+          >
+          <label
+            ><input id="webp-smart-subsample" type="checkbox" checked /> WebP
+            smartSubsample</label
+          >
+          <label
+            ><input id="webp-smart-deblock" type="checkbox" /> WebP
+            smartDeblock</label
+          >
+          <label
+            ><input id="webp-alpha-quality" type="checkbox" /> WebP
+            alphaQuality=100</label
+          >
+          <label><input id="webp-lossless" type="checkbox" /> WebP lossless</label>
+          <label
+            ><input id="webp-near-lossless" type="checkbox" /> WebP near
+            lossless</label
+          >
+        </div>
+      </div>
+
+      <div class="group wide">
+        <strong>Visible options</strong>
+        <div id="variant-visibility" class="checkbox-grid"></div>
+      </div>
     </div>
 
     <table id="comparison-table" hidden>
       <thead>
         <tr id="header-row"></tr>
-        <tr id="description-row"></tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
 
     <script type="module">
-      const VARIANTS = [
-        {
-          id: "thumbnail",
-          label: "Thumbnail",
-          type: "thumbnail",
-          description:
-            "300px JPEG thumbnail baseline generated with sharp and mozjpeg."
-        },
-        {
-          id: "modern-webp-8",
-          label: "LQIP modern webp @ 8px",
-          type: "modern",
-          format: "webp",
-          size: 8
-        },
-        {
-          id: "modern-avif-8",
-          label: "LQIP modern avif @ 8px",
-          type: "modern",
-          format: "avif",
-          size: 8
-        },
+      const MODERN_VARIANTS = [
+        { id: "modern-webp-8", label: "webp @ 8px", format: "webp", size: 8 },
+        { id: "modern-avif-8", label: "avif @ 8px", format: "avif", size: 8 },
         {
           id: "modern-webp-16",
-          label: "LQIP modern webp @ 16px",
-          type: "modern",
+          label: "webp @ 16px",
           format: "webp",
           size: 16,
           selected: true
         },
+        { id: "modern-avif-16", label: "avif @ 16px", format: "avif", size: 16 },
+        { id: "modern-webp-32", label: "webp @ 32px", format: "webp", size: 32 },
+        { id: "modern-avif-32", label: "avif @ 32px", format: "avif", size: 32 }
+      ]
+
+      const STATIC_VARIANTS = [
         {
-          id: "modern-avif-16",
-          label: "LQIP modern avif @ 16px",
-          type: "modern",
-          format: "avif",
-          size: 16
-        },
-        {
-          id: "modern-webp-32",
-          label: "LQIP modern webp @ 32px",
-          type: "modern",
-          format: "webp",
-          size: 32
-        },
-        {
-          id: "modern-avif-32",
-          label: "LQIP modern avif @ 32px",
-          type: "modern",
-          format: "avif",
-          size: 32
+          id: "thumbnail",
+          label: "Thumbnail",
+          type: "thumbnail",
+          defaultVisible: true
         },
         {
           id: "gip",
           label: "gip (cssgip)",
           type: "css",
-          description:
-            "Gradient Image Placeholders generated with cssgip as CSS gradients."
+          defaultVisible: false
         },
         {
           id: "css-lqip",
-          label: "CSS-LQIP (2026)",
+          label: "CSS-LQIP",
           type: "css-lqip",
-          description:
-            "Compact numeric CSS-LQIP value rendered with modern CSS gradients."
+          defaultVisible: true
         },
         {
           id: "blurhash-as-css-gradient",
           label: "blurhash-as-css-gradient",
           type: "css",
-          description:
-            "BlurHash rendered as CSS gradients via @unpic/placeholder."
+          defaultVisible: false
         },
         {
           id: "blurhash-as-css",
           label: "blurhash-as-css",
           type: "css",
-          description:
-            "BlurHash rendered as CSS object output from blurhash-to-css."
+          defaultVisible: false
         }
       ]
 
-      function average(values) {
-        if (!values.length) return 0
-        return values.reduce((acc, value) => acc + value, 0) / values.length
-      }
+      const VARIANTS = [...STATIC_VARIANTS.slice(0, 1), ...MODERN_VARIANTS, ...STATIC_VARIANTS.slice(1)]
 
-      function formatSeconds(tuple) {
-        const seconds = tuple[0] + tuple[1] / 1_000_000_000
-        return `${seconds.toFixed(3)}s`
-      }
+      const modernPreviewCache = new Map()
+      const qualityOptions = []
+      const variantIds = new Set(VARIANTS.map((variant) => variant.id))
 
-      function percent(value, baseline) {
-        if (!baseline) return "n/a"
-        return `${((value / baseline) * 100).toFixed(2)}%`
-      }
-
-      function escapeHtml(text) {
-        return text
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-      }
-
-      function getResultByName(image, variantName) {
-        return image.results.find((result) => result.variantName === variantName)
-      }
-
-      function modernVariantName({
-        format,
-        size,
-        quality,
-        blurLevel,
-        blurTarget
-      }) {
-        return `lqip-modern-${format}-${size}-q${quality}-b${blurLevel}-t${blurTarget}`
+      function formatBytes(bytes) {
+        if (bytes < 1000) return `${bytes} B`
+        if (bytes < 1000 * 1000) return `${(bytes / 1000).toFixed(2)} kB`
+        return `${(bytes / (1000 * 1000)).toFixed(2)} MB`
       }
 
       function getBlurConfig(controlsConfig, blurLevelId) {
         return controlsConfig.blurLevels.find((level) => level.id === blurLevelId)
       }
 
-      function resolveVariantResult(image, variant, controlsConfig, state) {
-        if (variant.type === "modern") {
-          const quality =
-            variant.format === "webp" ? state.webpQuality : state.avifQuality
-          const blurMode = state.blurMode
-          const blurLevel = blurMode === "css" ? "0" : state.blurLevel
-          const blurTarget =
-            blurMode === "css" || blurLevel === "0"
-              ? "none"
-              : state.sharpBlurTarget
-          const variantName = modernVariantName({
-            format: variant.format,
-            size: variant.size,
-            quality,
-            blurLevel,
-            blurTarget
-          })
-
-          const result = getResultByName(image, variantName)
-          const blurConfig = getBlurConfig(controlsConfig, state.blurLevel)
-          const cssBlurPx = blurMode === "css" ? blurConfig.cssPx : 0
-
-          return { result, cssBlurPx }
+      function getStaticResult(image, variantId) {
+        if (variantId === "thumbnail") {
+          return image.thumbnail
         }
 
-        if (variant.type === "thumbnail") {
-          return { result: getResultByName(image, variant.id), cssBlurPx: 0 }
+        return image.results.find((result) => result.variantName === variantId)
+      }
+
+      function getVisibleVariants(state) {
+        return VARIANTS.filter((variant) => state.visibleVariantIds.has(variant.id))
+      }
+
+      function qualityAt(index) {
+        return qualityOptions[Math.max(0, Math.min(qualityOptions.length - 1, index))]
+      }
+
+      function qualityIndex(value) {
+        const idx = qualityOptions.indexOf(value)
+        return idx === -1 ? 0 : idx
+      }
+
+      function parseBooleanQuery(value, fallback) {
+        if (value === null) return fallback
+        const normalized = value.toLowerCase()
+        return normalized === "1" || normalized === "true" || normalized === "yes"
+      }
+
+      function parseIntQuery(value, fallback, min, max) {
+        if (value === null) return fallback
+        const num = Number(value)
+        if (!Number.isFinite(num)) return fallback
+        return Math.min(max, Math.max(min, Math.round(num)))
+      }
+
+      function syncQueryParams(state) {
+        const params = new URLSearchParams(window.location.search)
+        params.set("webpQuality", String(state.webpQuality))
+        params.set("avifQuality", String(state.avifQuality))
+        params.set("blurMode", state.blurMode)
+        params.set("sharpBlurLevel", state.sharpBlurLevel)
+        params.set("sharpBlurTarget", state.sharpBlurTarget)
+        params.set("cssBlurPx", String(state.cssBlurPx))
+
+        params.set("avifLossless", state.avifLossless ? "1" : "0")
+        params.set(
+          "avifChromaSubsampling444",
+          state.avifChromaSubsampling444 ? "1" : "0"
+        )
+        params.set("webpSmartSubsample", state.webpSmartSubsample ? "1" : "0")
+        params.set("webpSmartDeblock", state.webpSmartDeblock ? "1" : "0")
+        params.set("webpAlphaQuality", state.webpAlphaQuality ? "1" : "0")
+        params.set("webpLossless", state.webpLossless ? "1" : "0")
+        params.set("webpNearLossless", state.webpNearLossless ? "1" : "0")
+
+        const orderedVisible = VARIANTS.filter((variant) =>
+          state.visibleVariantIds.has(variant.id)
+        ).map((variant) => variant.id)
+        params.set("visible", orderedVisible.join(","))
+
+        const query = params.toString()
+        const nextUrl = query
+          ? `${window.location.pathname}?${query}`
+          : window.location.pathname
+        window.history.replaceState({}, "", nextUrl)
+      }
+
+      function hydrateStateFromQuery(state, controlsConfig) {
+        const params = new URLSearchParams(window.location.search)
+
+        const webpQuality = Number(params.get("webpQuality"))
+        if (qualityOptions.includes(webpQuality)) {
+          state.webpQuality = webpQuality
         }
 
-        const blurConfig = getBlurConfig(controlsConfig, state.blurLevel)
-        return {
-          result: getResultByName(image, variant.id),
-          cssBlurPx: blurConfig.cssPx
+        const avifQuality = Number(params.get("avifQuality"))
+        if (qualityOptions.includes(avifQuality)) {
+          state.avifQuality = avifQuality
+        }
+
+        const blurMode = params.get("blurMode")
+        if (blurMode === "css" || blurMode === "sharp") {
+          state.blurMode = blurMode
+        }
+
+        const sharpBlurLevel = params.get("sharpBlurLevel")
+        if (
+          sharpBlurLevel &&
+          controlsConfig.blurLevels.some((level) => level.id === sharpBlurLevel)
+        ) {
+          state.sharpBlurLevel = sharpBlurLevel
+        }
+
+        const sharpBlurTarget = params.get("sharpBlurTarget")
+        if (
+          sharpBlurTarget &&
+          controlsConfig.blurTargets.includes(sharpBlurTarget)
+        ) {
+          state.sharpBlurTarget = sharpBlurTarget
+        }
+
+        state.cssBlurPx = parseIntQuery(params.get("cssBlurPx"), state.cssBlurPx, 0, 40)
+        state.avifLossless = parseBooleanQuery(
+          params.get("avifLossless"),
+          state.avifLossless
+        )
+        state.avifChromaSubsampling444 = parseBooleanQuery(
+          params.get("avifChromaSubsampling444"),
+          state.avifChromaSubsampling444
+        )
+        state.webpSmartSubsample = parseBooleanQuery(
+          params.get("webpSmartSubsample"),
+          state.webpSmartSubsample
+        )
+        state.webpSmartDeblock = parseBooleanQuery(
+          params.get("webpSmartDeblock"),
+          state.webpSmartDeblock
+        )
+        state.webpAlphaQuality = parseBooleanQuery(
+          params.get("webpAlphaQuality"),
+          state.webpAlphaQuality
+        )
+        state.webpLossless = parseBooleanQuery(
+          params.get("webpLossless"),
+          state.webpLossless
+        )
+        state.webpNearLossless = parseBooleanQuery(
+          params.get("webpNearLossless"),
+          state.webpNearLossless
+        )
+
+        const visible = params.get("visible")
+        if (visible !== null) {
+          const nextVisible = new Set(
+            visible
+              .split(",")
+              .map((id) => id.trim())
+              .filter((id) => variantIds.has(id))
+          )
+          state.visibleVariantIds = nextVisible
         }
       }
 
-      function variantDescription(variant, controlsConfig, state) {
-        if (variant.type !== "modern") {
-          return variant.description
+      function modernUrl(image, variant, state) {
+        const params = new URLSearchParams()
+        params.set("image", image.filename)
+        params.set("format", variant.format)
+        params.set("size", String(variant.size))
+        params.set(
+          "quality",
+          String(variant.format === "webp" ? state.webpQuality : state.avifQuality)
+        )
+
+        const blurMode = state.blurMode
+        const sharpBlurLevel = blurMode === "sharp" ? state.sharpBlurLevel : "0"
+        params.set("sharpBlurLevel", sharpBlurLevel)
+        params.set(
+          "sharpBlurTarget",
+          sharpBlurLevel === "0" ? "placeholder" : state.sharpBlurTarget
+        )
+
+        if (blurMode === "sharp" && sharpBlurLevel === "0") {
+          params.set("avifLossless", String(state.avifLossless))
+          params.set(
+            "avifChromaSubsampling",
+            state.avifChromaSubsampling444 ? "444" : "420"
+          )
+          params.set("webpSmartSubsample", String(state.webpSmartSubsample))
+          params.set("webpSmartDeblock", String(state.webpSmartDeblock))
+          params.set("webpAlphaQuality", String(state.webpAlphaQuality))
+          params.set("webpLossless", String(state.webpLossless))
+          params.set("webpNearLossless", String(state.webpNearLossless))
         }
 
-        const quality = variant.format === "webp" ? state.webpQuality : state.avifQuality
-        const blurConfig = getBlurConfig(controlsConfig, state.blurLevel)
+        return `/api/modern?${params.toString()}`
+      }
 
-        if (state.blurMode === "css") {
-          return `${variant.size}px ${variant.format.toUpperCase()} placeholder with quality ${quality}. Blur applied via CSS (${blurConfig.cssPx}px).`
+      async function loadModernPreview(url) {
+        const cached = modernPreviewCache.get(url)
+        if (cached) return cached
+
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(`Request failed (${response.status})`)
         }
 
-        const targetLabel =
-          state.sharpBlurTarget === "original"
-            ? "original image"
-            : "placeholder image"
+        const blob = await response.blob()
+        const objectUrl = URL.createObjectURL(blob)
+        const value = { objectUrl, sizeBytes: blob.size }
+        modernPreviewCache.set(url, value)
+        return value
+      }
 
-        return `${variant.size}px ${variant.format.toUpperCase()} placeholder with quality ${quality}. Blur baked with sharp (sigma ${blurConfig.sharpSigma}) on ${targetLabel}.`
+      function applyCssBlur(target, cssBlurPx) {
+        if (cssBlurPx > 0) {
+          target.style.filter = `blur(${cssBlurPx}px)`
+          target.style.transform = "scale(1.08)"
+        } else {
+          target.style.removeProperty("filter")
+          target.style.removeProperty("transform")
+        }
+      }
+
+      function updateCssBlurLive(state) {
+        const wrappers = document.querySelectorAll("[data-css-overlay='1']")
+        for (const wrapper of wrappers) {
+          if (state.cssBlurPx > 0) {
+            wrapper.classList.add("preview-wrapper-lqip")
+            wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
+          } else {
+            wrapper.classList.remove("preview-wrapper-lqip")
+            wrapper.style.removeProperty("--css-blur")
+          }
+        }
+
+        const filterTargets = document.querySelectorAll("[data-css-filter='1']")
+        for (const target of filterTargets) {
+          applyCssBlur(target, state.cssBlurPx)
+        }
       }
 
       function clearTable() {
         document.querySelector("#header-row").innerHTML = ""
-        document.querySelector("#description-row").innerHTML = ""
         document.querySelector("#rows").innerHTML = ""
       }
 
-      function renderHeader(images, controlsConfig, state) {
+      function renderHeader(visibleVariants) {
         const headerRow = document.querySelector("#header-row")
-        const descriptionRow = document.querySelector("#description-row")
-        const avgBaselineBytes = average(
-          images
-            .map((image) => getResultByName(image, "thumbnail"))
-            .filter(Boolean)
-            .map((result) => result.sizes.originalBytes)
-        )
-
-        for (const variant of VARIANTS) {
-          const resolved = images
-            .map((image) => resolveVariantResult(image, variant, controlsConfig, state))
-            .map((entry) => entry.result)
-            .filter(Boolean)
-
-          const avgProcessingNs = average(
-            resolved.map(
-              (result) => result.processTime[0] * 1_000_000_000 + result.processTime[1]
-            )
-          )
-          const avgSizeBytes = average(
-            resolved.map((result) => result.sizes.originalBytes)
-          )
-
+        for (const variant of visibleVariants) {
           const th = document.createElement("th")
           th.textContent = variant.label
           if (variant.selected) th.classList.add("selected")
           headerRow.appendChild(th)
-
-          const td = document.createElement("td")
-          if (variant.selected) td.classList.add("selected")
-          td.innerHTML = `
-            <div class="description">
-              <p>${escapeHtml(variantDescription(variant, controlsConfig, state))}</p>
-              <p class="processing-time">
-                <img alt="average processing time" src="./assets/processing-time.svg" width="20" />
-                <span title="Average processing time">${(avgProcessingNs / 1_000_000_000).toFixed(3)}s</span>
-                <span title="Average size"> | ø ${Math.round(avgSizeBytes)} B</span>
-                <span title="Average size compared to thumbnail"> | ${percent(avgSizeBytes, avgBaselineBytes)}</span>
-              </p>
-            </div>
-          `
-          descriptionRow.appendChild(td)
         }
       }
 
-      function applyCssBlur(previewElement, cssBlurPx) {
-        if (cssBlurPx > 0) {
-          previewElement.style.filter = `blur(${cssBlurPx}px)`
-          previewElement.style.transform = "scale(1.08)"
+      function createSizeLabel() {
+        const sizeLabel = document.createElement("div")
+        sizeLabel.className = "size-below"
+        sizeLabel.textContent = "..."
+        return sizeLabel
+      }
+
+      function setSizeLabel(sizeLabel, bytes) {
+        sizeLabel.dataset.sizeBytes = String(bytes)
+        sizeLabel.dataset.baseText = formatBytes(bytes)
+        sizeLabel.textContent = sizeLabel.dataset.baseText
+      }
+
+      function updateRowTrophy(row) {
+        const labels = [...row.querySelectorAll(".size-below")]
+        let minBytes = Number.POSITIVE_INFINITY
+
+        for (const label of labels) {
+          const bytes = Number(label.dataset.sizeBytes)
+          if (Number.isFinite(bytes) && bytes >= 0) {
+            minBytes = Math.min(minBytes, bytes)
+          }
+        }
+
+        for (const label of labels) {
+          const bytes = Number(label.dataset.sizeBytes)
+          const baseText = label.dataset.baseText || label.textContent || ""
+          if (Number.isFinite(bytes) && bytes === minBytes && minBytes < Number.POSITIVE_INFINITY) {
+            label.classList.add("is-winner")
+            label.textContent = `🏆 ${baseText}`
+          } else {
+            label.classList.remove("is-winner")
+            label.textContent = baseText
+          }
         }
       }
 
-      function renderImageCell({
-        cell,
-        image,
-        result,
-        cssBlurPx,
-        variant,
-        thumbnailResult
-      }) {
+      function renderStaticCell(cell, image, variant, result, state) {
         const wrapper = document.createElement("div")
         wrapper.className = "preview-wrapper"
         wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
+        const sizeLabel = createSizeLabel()
 
-        if (variant.type === "modern" && cssBlurPx > 0) {
-          wrapper.classList.add("preview-wrapper-lqip")
-          wrapper.style.setProperty("--css-blur", `${cssBlurPx}px`)
-        }
-
-        if (result.kind === "image" || result.kind === "modern-image") {
+        if (variant.type === "thumbnail") {
           const img = document.createElement("img")
           img.className = "preview"
           img.src = `processed/${result.name}`
           img.alt = result.name
           wrapper.appendChild(img)
-        } else if (result.kind === "css-lqip") {
+          setSizeLabel(sizeLabel, result.sizeBytes)
+        } else if (variant.type === "css-lqip") {
           const preview = document.createElement("picture")
           preview.className = "css-lqip-preview"
           preview.style.setProperty("--lqip", result.lqip)
-          applyCssBlur(preview, cssBlurPx)
+          preview.dataset.cssFilter = "1"
+          applyCssBlur(preview, state.cssBlurPx)
 
           const img = document.createElement("img")
-          img.src = `processed/${thumbnailResult.name}`
+          img.src = `processed/${image.thumbnail.name}`
           img.alt = `${image.filename}-css-lqip`
           preview.appendChild(img)
           wrapper.appendChild(preview)
+          setSizeLabel(sizeLabel, result.sizeBytes)
         } else {
           const preview = document.createElement("div")
           preview.className = "css-preview"
           preview.setAttribute("style", result.css)
-          applyCssBlur(preview, cssBlurPx)
+          preview.dataset.cssFilter = "1"
+          applyCssBlur(preview, state.cssBlurPx)
           wrapper.appendChild(preview)
+          setSizeLabel(sizeLabel, result.sizeBytes)
         }
 
-        const overlay = document.createElement("div")
-        overlay.className = "overlay"
-        overlay.innerHTML = `
-          <div>
-            ${
-              result.kind === "image" || result.kind === "modern-image"
-                ? `<a href="processed/${result.name}">${result.name}</a>`
-                : `<code>${escapeHtml(
-                    result.kind === "css-lqip" ? result.lqip : result.css
-                  )}</code>`
-            }
-          </div>
-          <table>
-            <tbody>
-              <tr><th>Dimensions</th><td>${result.dimensions.width} x ${result.dimensions.height}</td></tr>
-              <tr><th>Ratio</th><td>${result.dimensions.ratio}</td></tr>
-              <tr><th>Original size</th><td>${result.sizes.originalHuman}</td></tr>
-              <tr><th>Gzip size</th><td>${result.sizes.gzipHuman}</td></tr>
-              <tr><th>Brotli size</th><td>${result.sizes.brotliHuman}</td></tr>
-              <tr><th>Proc time</th><td>${formatSeconds(result.processTime)}</td></tr>
-              <tr><th>Size vs thumbnail</th><td>${percent(
-                result.sizes.originalBytes,
-                thumbnailResult.sizes.originalBytes
-              )}</td></tr>
-            </tbody>
-          </table>
-        `
-        wrapper.appendChild(overlay)
         cell.appendChild(wrapper)
+        cell.appendChild(sizeLabel)
       }
 
-      function renderRows(images, controlsConfig, state) {
-        const tbody = document.querySelector("#rows")
+      function renderModernCell(cell, image, variant, state, row) {
+        const wrapper = document.createElement("div")
+        wrapper.className = "preview-wrapper is-loading"
+        wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
+        const img = document.createElement("img")
+        img.className = "preview"
+        img.alt = `${image.filename}-${variant.id}`
+        wrapper.appendChild(img)
+        const sizeLabel = createSizeLabel()
 
+        if (state.blurMode === "css" && state.cssBlurPx > 0) {
+          wrapper.dataset.cssOverlay = "1"
+          wrapper.classList.add("preview-wrapper-lqip")
+          wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
+        }
+
+        const url = modernUrl(image, variant, state)
+        loadModernPreview(url)
+          .then(({ objectUrl, sizeBytes }) => {
+            img.src = objectUrl
+            setSizeLabel(sizeLabel, sizeBytes)
+            wrapper.classList.remove("is-loading")
+            updateRowTrophy(row)
+          })
+          .catch((error) => {
+            sizeLabel.textContent = error.message
+            delete sizeLabel.dataset.sizeBytes
+            delete sizeLabel.dataset.baseText
+            wrapper.classList.remove("is-loading")
+            updateRowTrophy(row)
+          })
+
+        cell.appendChild(wrapper)
+        cell.appendChild(sizeLabel)
+      }
+
+      function renderRows(images, visibleVariants, state) {
+        const tbody = document.querySelector("#rows")
         for (const image of images) {
           const row = document.createElement("tr")
-          const thumbnailResult = getResultByName(image, "thumbnail")
-          if (!thumbnailResult) continue
-
-          for (const variant of VARIANTS) {
+          for (const variant of visibleVariants) {
             const cell = document.createElement("td")
-            if (variant.selected) {
-              cell.classList.add("selected")
+            if (variant.selected) cell.classList.add("selected")
+
+            if (variant.format) {
+              renderModernCell(cell, image, variant, state, row)
+            } else {
+              const result = getStaticResult(image, variant.id)
+              if (!result) {
+                cell.textContent = "-"
+              } else {
+                renderStaticCell(cell, image, variant, result, state)
+              }
             }
 
-            const { result, cssBlurPx } = resolveVariantResult(
-              image,
-              variant,
-              controlsConfig,
-              state
-            )
-
-            if (!result) {
-              cell.textContent = "-"
-              row.appendChild(cell)
-              continue
-            }
-
-            renderImageCell({
-              cell,
-              image,
-              result,
-              cssBlurPx,
-              variant,
-              thumbnailResult
-            })
             row.appendChild(cell)
           }
-
+          updateRowTrophy(row)
           tbody.appendChild(row)
         }
       }
 
-      function renderTable(images, controlsConfig, state) {
+      function renderTable(images, state) {
+        const visibleVariants = getVisibleVariants(state)
         clearTable()
-        renderHeader(images, controlsConfig, state)
-        renderRows(images, controlsConfig, state)
+        renderHeader(visibleVariants)
+        renderRows(images, visibleVariants, state)
       }
 
-      function selectOptions(select, values, selected) {
-        select.innerHTML = ""
-        for (const value of values) {
-          const option = document.createElement("option")
-          option.value = String(value)
-          option.textContent = String(value)
-          option.selected = String(value) === String(selected)
-          select.appendChild(option)
+      function setupVisibilityControls(state, onChange) {
+        const root = document.querySelector("#variant-visibility")
+        root.innerHTML = ""
+        for (const variant of VARIANTS) {
+          const label = document.createElement("label")
+          const checkbox = document.createElement("input")
+          checkbox.type = "checkbox"
+          checkbox.checked = state.visibleVariantIds.has(variant.id)
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) state.visibleVariantIds.add(variant.id)
+            else state.visibleVariantIds.delete(variant.id)
+            onChange()
+          })
+          label.appendChild(checkbox)
+          label.appendChild(document.createTextNode(variant.label))
+          root.appendChild(label)
         }
       }
 
-      function setupControls({ controlsConfig, state, onChange }) {
+      function setupControls({ controlsConfig, state, onChange, onSync }) {
         const controlsRoot = document.querySelector("#controls")
         const webpQualityEl = document.querySelector("#webp-quality")
         const avifQualityEl = document.querySelector("#avif-quality")
-        const blurLevelEl = document.querySelector("#blur-level")
+        const webpQualityValueEl = document.querySelector("#webp-quality-value")
+        const avifQualityValueEl = document.querySelector("#avif-quality-value")
+        const sharpBlurLevelEl = document.querySelector("#sharp-blur-level")
         const blurModeEl = document.querySelector("#blur-mode")
         const sharpBlurTargetEl = document.querySelector("#sharp-blur-target")
+        const cssBlurEl = document.querySelector("#css-blur")
+        const cssBlurValueEl = document.querySelector("#css-blur-value")
 
-        selectOptions(
-          webpQualityEl,
-          controlsConfig.webpQualityOptions,
-          state.webpQuality
-        )
-        selectOptions(
-          avifQualityEl,
-          controlsConfig.avifQualityOptions,
-          state.avifQuality
-        )
+        const avifLosslessEl = document.querySelector("#avif-lossless")
+        const avifChroma444El = document.querySelector("#avif-chroma-444")
+        const webpSmartSubsampleEl = document.querySelector("#webp-smart-subsample")
+        const webpSmartDeblockEl = document.querySelector("#webp-smart-deblock")
+        const webpAlphaQualityEl = document.querySelector("#webp-alpha-quality")
+        const webpLosslessEl = document.querySelector("#webp-lossless")
+        const webpNearLosslessEl = document.querySelector("#webp-near-lossless")
 
-        blurLevelEl.innerHTML = ""
+        webpQualityEl.max = String(qualityOptions.length - 1)
+        avifQualityEl.max = String(qualityOptions.length - 1)
+        webpQualityEl.value = String(qualityIndex(state.webpQuality))
+        avifQualityEl.value = String(qualityIndex(state.avifQuality))
+        webpQualityValueEl.textContent = String(state.webpQuality)
+        avifQualityValueEl.textContent = String(state.avifQuality)
+
+        sharpBlurLevelEl.innerHTML = ""
         for (const level of controlsConfig.blurLevels) {
           const option = document.createElement("option")
           option.value = level.id
-          option.textContent = `${level.label} (sigma ${level.sharpSigma}, css ${level.cssPx}px)`
-          option.selected = level.id === state.blurLevel
-          blurLevelEl.appendChild(option)
+          option.textContent = `${level.label} (sigma ${level.sharpSigma})`
+          option.selected = level.id === state.sharpBlurLevel
+          sharpBlurLevelEl.appendChild(option)
         }
 
-        selectOptions(
-          sharpBlurTargetEl,
-          controlsConfig.blurTargets,
-          state.sharpBlurTarget
-        )
         blurModeEl.value = state.blurMode
+        sharpBlurTargetEl.value = state.sharpBlurTarget
+        cssBlurEl.value = String(state.cssBlurPx)
+        cssBlurValueEl.textContent = `${state.cssBlurPx}px`
 
-        function syncDisabledStates() {
-          sharpBlurTargetEl.disabled = state.blurMode !== "sharp"
+        avifLosslessEl.checked = state.avifLossless
+        avifChroma444El.checked = state.avifChromaSubsampling444
+        webpSmartSubsampleEl.checked = state.webpSmartSubsample
+        webpSmartDeblockEl.checked = state.webpSmartDeblock
+        webpAlphaQualityEl.checked = state.webpAlphaQuality
+        webpLosslessEl.checked = state.webpLossless
+        webpNearLosslessEl.checked = state.webpNearLossless
+
+        function syncDisabled() {
+          const sharpMode = state.blurMode === "sharp"
+          sharpBlurTargetEl.disabled = !sharpMode
+          sharpBlurLevelEl.disabled = !sharpMode
+          for (const element of document.querySelectorAll(".sharp-only")) {
+            element.hidden = !sharpMode
+          }
         }
 
-        webpQualityEl.addEventListener("change", () => {
-          state.webpQuality = Number(webpQualityEl.value)
+        webpQualityEl.addEventListener("input", () => {
+          state.webpQuality = qualityAt(Number(webpQualityEl.value))
+          webpQualityValueEl.textContent = String(state.webpQuality)
           onChange()
         })
-        avifQualityEl.addEventListener("change", () => {
-          state.avifQuality = Number(avifQualityEl.value)
+        avifQualityEl.addEventListener("input", () => {
+          state.avifQuality = qualityAt(Number(avifQualityEl.value))
+          avifQualityValueEl.textContent = String(state.avifQuality)
           onChange()
         })
-        blurLevelEl.addEventListener("change", () => {
-          state.blurLevel = blurLevelEl.value
+        sharpBlurLevelEl.addEventListener("change", () => {
+          state.sharpBlurLevel = sharpBlurLevelEl.value
           onChange()
         })
         blurModeEl.addEventListener("change", () => {
           state.blurMode = blurModeEl.value
-          syncDisabledStates()
+          syncDisabled()
           onChange()
         })
         sharpBlurTargetEl.addEventListener("change", () => {
@@ -673,7 +806,30 @@
           onChange()
         })
 
-        syncDisabledStates()
+        cssBlurEl.addEventListener("input", () => {
+          state.cssBlurPx = Number(cssBlurEl.value)
+          cssBlurValueEl.textContent = `${state.cssBlurPx}px`
+          updateCssBlurLive(state)
+          onSync()
+        })
+
+        for (const [el, key] of [
+          [avifLosslessEl, "avifLossless"],
+          [avifChroma444El, "avifChromaSubsampling444"],
+          [webpSmartSubsampleEl, "webpSmartSubsample"],
+          [webpSmartDeblockEl, "webpSmartDeblock"],
+          [webpAlphaQualityEl, "webpAlphaQuality"],
+          [webpLosslessEl, "webpLossless"],
+          [webpNearLosslessEl, "webpNearLossless"]
+        ]) {
+          el.addEventListener("change", () => {
+            state[key] = el.checked
+            onChange()
+          })
+        }
+
+        setupVisibilityControls(state, onChange)
+        syncDisabled()
         controlsRoot.hidden = false
       }
 
@@ -691,21 +847,44 @@
           const controlsConfig = payload.controls
           const images = payload.images
 
+          qualityOptions.splice(0, qualityOptions.length, ...controlsConfig.qualityOptions)
+
+          const defaults = controlsConfig.defaults
           const state = {
-            webpQuality: controlsConfig.defaults.webpQuality,
-            avifQuality: controlsConfig.defaults.avifQuality,
-            blurLevel: controlsConfig.defaults.blurLevel,
-            blurMode: controlsConfig.defaults.blurMode,
-            sharpBlurTarget: controlsConfig.defaults.sharpBlurTarget
+            webpQuality: defaults.webpQuality,
+            avifQuality: defaults.avifQuality,
+            sharpBlurLevel: defaults.sharpBlurLevel,
+            blurMode: defaults.blurMode,
+            sharpBlurTarget: defaults.sharpBlurTarget,
+            cssBlurPx: defaults.cssBlurPx,
+            avifLossless: defaults.avifLossless,
+            avifChromaSubsampling444: defaults.avifChromaSubsampling444,
+            webpSmartSubsample: defaults.webpSmartSubsample,
+            webpSmartDeblock: defaults.webpSmartDeblock,
+            webpAlphaQuality: defaults.webpAlphaQuality,
+            webpLossless: defaults.webpLossless,
+            webpNearLossless: defaults.webpNearLossless,
+            visibleVariantIds: new Set(
+              VARIANTS.filter((variant) => variant.defaultVisible !== false).map(
+                (variant) => variant.id
+              )
+            )
           }
 
+          hydrateStateFromQuery(state, controlsConfig)
+
+          const rerender = () => {
+            renderTable(images, state)
+            syncQueryParams(state)
+          }
           setupControls({
             controlsConfig,
             state,
-            onChange: () => renderTable(images, controlsConfig, state)
+            onChange: rerender,
+            onSync: () => syncQueryParams(state)
           })
 
-          renderTable(images, controlsConfig, state)
+          rerender()
           statusEl.remove()
           tableEl.hidden = false
         } catch (error) {
