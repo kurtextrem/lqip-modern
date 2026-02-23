@@ -9,7 +9,6 @@ import gip from "cssgip";
 import { encode as encodeBlurhash } from "blurhash";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import blurhashToCssPkg from "blurhash-to-css";
-import lqipModern from "../index.js";
 
 const { blurhashToCss } = blurhashToCssPkg;
 
@@ -21,10 +20,18 @@ const processedDir = path.join(__dirname, "processed");
 const outputPath = path.join(__dirname, "dataset.json");
 
 const MODERN_SIZES = [8, 16, 32];
+const MODERN_QUALITY_OPTIONS = [20, 50, 70];
 const MODERN_FORMATS = [
 	{ format: "webp", ext: "webp" },
 	{ format: "avif", ext: "avif" },
 ];
+const BLUR_LEVELS = [
+	{ id: "0", label: "none", sharpSigma: 0, cssPx: 0 },
+	{ id: "1", label: "low", sharpSigma: 1, cssPx: 10 },
+	{ id: "2", label: "medium", sharpSigma: 2, cssPx: 20 },
+	{ id: "3", label: "high", sharpSigma: 3, cssPx: 30 },
+];
+const BLUR_TARGETS = ["placeholder", "original"];
 
 function formatBytes(bytes) {
 	if (bytes < 1000) return `${bytes} B`;
@@ -148,6 +155,63 @@ function findOklabBits([targetL, targetA, targetB]) {
 	};
 }
 
+function modernVariantName({ format, size, quality, blurLevel, blurTarget }) {
+	return `lqip-modern-${format}-${size}-q${quality}-b${blurLevel}-t${blurTarget}`;
+}
+
+function modernOutputName({
+	filename,
+	format,
+	size,
+	quality,
+	blurLevel,
+	blurTarget,
+}) {
+	return `${filename}-lqip-modern-${format}-${size}-q${quality}-b${blurLevel}-t${blurTarget}.${format}`;
+}
+
+async function encodeModernImage({
+	sourceBuffer,
+	format,
+	size,
+	quality,
+	blurSigma,
+	blurTarget,
+}) {
+	let pipeline = sharp(sourceBuffer).rotate();
+
+	if (blurSigma > 0 && blurTarget === "original") {
+		pipeline = pipeline.blur(blurSigma);
+	}
+
+	pipeline = pipeline.resize(size, size, { fit: "inside" });
+
+	if (blurSigma > 0 && blurTarget === "placeholder") {
+		pipeline = pipeline.blur(blurSigma);
+	}
+
+	if (format === "webp") {
+		return pipeline
+			.webp({
+				quality,
+				alphaQuality: quality,
+				smartSubsample: true,
+			})
+			.toBuffer({ resolveWithObject: true });
+	}
+
+	if (format === "avif") {
+		return pipeline
+			.avif({
+				quality,
+				effort: 4,
+			})
+			.toBuffer({ resolveWithObject: true });
+	}
+
+	throw new Error(`Unsupported modern format "${format}"`);
+}
+
 async function encodeCssLqip(input) {
 	// Ported from 2026/cssLQIP.js for demo dataset generation.
 	const image = sharp(input).rotate();
@@ -238,10 +302,47 @@ async function createCssVariant({
 	};
 }
 
+function modernVariantMatrix() {
+	const variants = [];
+
+	for (const size of MODERN_SIZES) {
+		for (const { format } of MODERN_FORMATS) {
+			for (const quality of MODERN_QUALITY_OPTIONS) {
+				for (const blurLevel of BLUR_LEVELS) {
+					if (blurLevel.sharpSigma === 0) {
+						variants.push({
+							format,
+							size,
+							quality,
+							blurLevel: blurLevel.id,
+							blurSigma: 0,
+							blurTarget: "none",
+						});
+					} else {
+						for (const blurTarget of BLUR_TARGETS) {
+							variants.push({
+								format,
+								size,
+								quality,
+								blurLevel: blurLevel.id,
+								blurSigma: blurLevel.sharpSigma,
+								blurTarget,
+							});
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return variants;
+}
+
 async function generate() {
 	await fs.ensureDir(processedDir);
 	const inputPaths = globby.sync(inputGlob).sort();
-	const dataset = [];
+	const images = [];
+	const modernVariants = modernVariantMatrix();
 
 	for (const filePath of inputPaths) {
 		const sourceBuffer = await fs.readFile(filePath);
@@ -270,30 +371,46 @@ async function generate() {
 			}),
 		);
 
-		for (const size of MODERN_SIZES) {
-			for (const formatConfig of MODERN_FORMATS) {
-				const startNs = process.hrtime.bigint();
-				const result = await lqipModern(sourceBuffer, {
-					resize: size,
-					outputFormat: formatConfig.format,
-				});
-				const outputName = `${filename}-lqip-modern-${formatConfig.format}-${size}.${formatConfig.ext}`;
-				await fs.writeFile(path.join(processedDir, outputName), result.content);
+		for (const modernVariant of modernVariants) {
+			const outputName = modernOutputName({
+				filename,
+				format: modernVariant.format,
+				size: modernVariant.size,
+				quality: modernVariant.quality,
+				blurLevel: modernVariant.blurLevel,
+				blurTarget: modernVariant.blurTarget,
+			});
+			const variantName = modernVariantName(modernVariant);
 
-				results.push({
-					variantName: `lqip-modern-${formatConfig.format}-${size}`,
-					kind: "image",
-					name: outputName,
-					dist: path.join(processedDir, outputName),
-					sizes: toSizeSummary(result.content),
-					dimensions: {
-						width: result.metadata.width,
-						height: result.metadata.height,
-						ratio: ratioString(result.metadata.width, result.metadata.height),
-					},
-					processTime: elapsedTuple(startNs),
-				});
-			}
+			const startNs = process.hrtime.bigint();
+			const { data, info } = await encodeModernImage({
+				sourceBuffer,
+				format: modernVariant.format,
+				size: modernVariant.size,
+				quality: modernVariant.quality,
+				blurSigma: modernVariant.blurSigma,
+				blurTarget: modernVariant.blurTarget,
+			});
+			await fs.writeFile(path.join(processedDir, outputName), data);
+
+			results.push({
+				variantName,
+				kind: "modern-image",
+				name: outputName,
+				dist: path.join(processedDir, outputName),
+				format: modernVariant.format,
+				size: modernVariant.size,
+				quality: modernVariant.quality,
+				blurLevel: modernVariant.blurLevel,
+				blurTarget: modernVariant.blurTarget,
+				sizes: toSizeSummary(data),
+				dimensions: {
+					width: info.width,
+					height: info.height,
+					ratio: ratioString(info.width, info.height),
+				},
+				processTime: elapsedTuple(startNs),
+			});
 		}
 
 		{
@@ -372,7 +489,7 @@ async function generate() {
 			);
 		}
 
-		dataset.push({
+		images.push({
 			path: filePath,
 			filename,
 			results,
@@ -384,9 +501,27 @@ async function generate() {
 		});
 	}
 
+	const dataset = {
+		controls: {
+			modernSizes: MODERN_SIZES,
+			webpQualityOptions: MODERN_QUALITY_OPTIONS,
+			avifQualityOptions: MODERN_QUALITY_OPTIONS,
+			blurLevels: BLUR_LEVELS,
+			blurTargets: BLUR_TARGETS,
+			defaults: {
+				webpQuality: 50,
+				avifQuality: 70,
+				blurLevel: "2",
+				blurMode: "css",
+				sharpBlurTarget: "placeholder",
+			},
+		},
+		images,
+	};
+
 	await fs.writeFile(outputPath, JSON.stringify(dataset, null, 2));
 	console.log(
-		`Generated comparison dataset for ${dataset.length} images at ${outputPath}`,
+		`Generated comparison dataset for ${images.length} images at ${outputPath}`,
 	);
 }
 
