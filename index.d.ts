@@ -1,6 +1,6 @@
-import type { JpegOptions, WebpOptions } from 'sharp'
+import type { AvifOptions, JpegOptions, WebpOptions } from 'sharp'
 
-export type LqipModernFormat = 'webp' | 'jpeg'
+export type LqipModernFormat = 'webp' | 'jpeg' | 'avif'
 
 export type LqipModernOutput = {
   /** Raw content of the resized output image. */
@@ -28,14 +28,14 @@ export type LqipModernOutput = {
 
 export type LqipModernOptions = {
   /**
-   * Output format to use; either `webp` or `jpeg` (passing `jpg` is the same as passing `jpeg`).
+   * Output format to use; either `webp`, `avif`, or `jpeg` (passing `jpg` is the same as passing `jpeg`).
    */
-  outputFormat?: 'webp' | 'jpeg' | 'jpg'
+  outputFormat?: 'webp' | 'avif' | 'jpeg' | 'jpg'
 
   /**
-   * Output options passed to either `sharp.webp` or `sharp.jpeg` dependent on `opts.outputFormat`.
+   * Output options passed to either `sharp.webp`, `sharp.avif`, or `sharp.jpeg` dependent on `opts.outputFormat`.
    */
-  outputOptions?: WebpOptions | JpegOptions
+  outputOptions?: WebpOptions | AvifOptions | JpegOptions
 
   /**
    * Options to pass to `sharp.resize`. Defaults to resizing inputs to a max dimension of `16`, with the other dimension being calculated to maintain aspect ratio. If you want more control, you can pass an array of args here which will be forwarded to `sharp.resize`.

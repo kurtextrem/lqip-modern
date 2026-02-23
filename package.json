@@ -25,12 +25,19 @@
     "test:unit": "ava -v",
     "test:lint": "eslint .",
     "test:format": "prettier '**/*.{js,json,ts}' --check",
+    "demo:generate": "node demo/generate-comparison-data.js",
     "demo": "serve demo",
     "deploy": "gh-pages -d demo"
   },
   "dependencies": {
+    "@unpic/placeholder": "0.1.2",
+    "blurhash": "^2.0.5",
+    "blurhash-to-css": "^0.5.5",
+    "colorthief": "^2.6.0",
+    "cssgip": "^1.0.4",
+    "node-fetch": "^3.3.2",
     "p-map": "^7.0.2",
-    "sharp": "^0.34.4"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@fisch0920/eslint-config": "^1.4.0",

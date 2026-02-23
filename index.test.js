@@ -20,8 +20,23 @@ for (const fixture of fixtures) {
     t.true(Buffer.isBuffer(result.content))
     t.true(result.metadata.width < result.metadata.originalWidth)
     t.true(result.metadata.height < result.metadata.originalHeight)
+    t.true(result.metadata.dataURIBase64.startsWith('data:image/webp;base64,'))
 
     await fs.writeFile(path.join(outputDir, `${name}.webp`), result.content)
+
+    console.log(fixture, result.metadata)
+    t.snapshot(result.metadata)
+  })
+
+  test(`${fixture} => avif`, async (t) => {
+    const result = await lqip(fixture, { outputFormat: 'avif' })
+    t.truthy(result)
+    t.true(Buffer.isBuffer(result.content))
+    t.true(result.metadata.width < result.metadata.originalWidth)
+    t.true(result.metadata.height < result.metadata.originalHeight)
+    t.true(result.metadata.dataURIBase64.startsWith('data:image/avif;base64,'))
+
+    await fs.writeFile(path.join(outputDir, `${name}.avif`), result.content)
 
     console.log(fixture, result.metadata)
     t.snapshot(result.metadata)
@@ -33,6 +48,7 @@ for (const fixture of fixtures) {
     t.true(Buffer.isBuffer(result.content))
     t.true(result.metadata.width < result.metadata.originalWidth)
     t.true(result.metadata.height < result.metadata.originalHeight)
+    t.true(result.metadata.dataURIBase64.startsWith('data:image/jpeg;base64,'))
 
     await fs.writeFile(path.join(outputDir, `${name}.jpg`), result.content)
 

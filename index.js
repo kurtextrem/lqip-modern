@@ -37,6 +37,12 @@ async function computeLqipImage(input, opts = {}) {
       smartSubsample: true,
       ...outputOptions
     })
+  } else if (outputFormat === 'avif') {
+    output = resized.avif({
+      quality: 35,
+      effort: 4,
+      ...outputOptions
+    })
   } else if (outputFormat === 'jpg' || outputFormat === 'jpeg') {
     output = resized.jpeg({
       quality: 20,
@@ -47,6 +53,12 @@ async function computeLqipImage(input, opts = {}) {
   }
 
   const { data, info } = await output.toBuffer({ resolveWithObject: true })
+  const normalizedOutputFormat =
+    outputFormat === 'jpg' ? 'jpeg' : outputFormat
+  const dataUriMimeType =
+    normalizedOutputFormat === 'jpeg'
+      ? 'image/jpeg'
+      : `image/${normalizedOutputFormat}`
 
   return {
     content: data,
@@ -55,8 +67,8 @@ async function computeLqipImage(input, opts = {}) {
       originalHeight: metadata.height,
       width: info.width,
       height: info.height,
-      type: outputFormat,
-      dataURIBase64: `data:image/webp;base64,${data.toString('base64')}`
+      type: normalizedOutputFormat,
+      dataURIBase64: `data:${dataUriMimeType};base64,${data.toString('base64')}`
     }
   }
 }
