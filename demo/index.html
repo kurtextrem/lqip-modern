@@ -11,6 +11,12 @@
         padding: 2rem;
       }
 
+      html {
+        scroll-behavior: smooth;
+        scroll-snap-type: y mandatory;
+        scroll-padding-top: 1rem;
+      }
+
       a {
         color: tomato;
       }
@@ -23,6 +29,8 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
       }
 
       table {
@@ -72,6 +80,18 @@
         object-fit: cover;
       }
 
+      .preview-anchor {
+        position: absolute;
+        inset: 0;
+        display: block;
+        cursor: pointer;
+      }
+
+      .preview-anchor:focus-visible {
+        outline: 2px solid #ffe27a;
+        outline-offset: 2px;
+      }
+
       .css-preview {
         background-size: cover;
         background-position: center;
@@ -83,8 +103,17 @@
         position: absolute;
         inset: 0;
         backdrop-filter: blur(var(--css-blur, 20px));
-        -webkit-backdrop-filter: blur(var(--css-blur, 20px));
         pointer-events: none;
+      }
+
+      .blur-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transform: scale(1);
       }
 
       .size-below {
@@ -114,6 +143,8 @@
         padding: 1rem;
         border: 1px solid #222;
         background: #111;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
       }
 
       .controls label,
@@ -156,6 +187,12 @@
         align-items: center;
         gap: 0.35rem;
       }
+
+      #rows > tr {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        scroll-margin-top: 1rem;
+      }
     </style>
   </head>
   <body>
@@ -187,7 +224,10 @@
       <label>
         Blur mode
         <select id="blur-mode">
-          <option value="css" selected>CSS blur</option>
+          <option value="backdrop" selected>Backdrop-filter blur</option>
+          <option value="filter">Filter blur</option>
+          <option value="svg-filter">SVG blur (default)</option>
+          <option value="nextjs-blur">SVG blur (nextjs blur)</option>
           <option value="sharp">Sharp blur in image bytes</option>
         </select>
       </label>
@@ -206,7 +246,7 @@
       </label>
 
       <label>
-        CSS blur <span id="css-blur-value">20px</span>
+        Blur amount <span id="css-blur-value">20px</span>
         <input id="css-blur" type="range" min="0" max="40" step="1" value="20" />
         <span class="helper">Seamless live update from 0px to 40px.</span>
       </label>
@@ -214,7 +254,7 @@
       <div class="group wide quality-options">
         <strong>Quality options</strong>
         <span class="helper"
-          >Only used when blur mode is CSS or when sharp blur level is none.</span
+          >Used for all client blur modes, or sharp mode when blur level is none.</span
         >
         <div class="checkbox-grid">
           <label><input id="avif-lossless" type="checkbox" /> AVIF lossless</label>
@@ -271,7 +311,19 @@
       <tbody id="rows"></tbody>
     </table>
 
+    <svg width="0" height="0" style="position: absolute; visibility: hidden">
+      <filter id="svgFilterBlur" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="20"></feGaussianBlur>
+        <feComponentTransfer>
+          <feFuncA type="discrete" tableValues="1 1"></feFuncA>
+        </feComponentTransfer>
+      </filter>
+    </svg>
+
     <script type="module">
+      import { getImageBlurSvg } from "/2026/svgFilter.js"
+      import { svgBlurImage } from "/2026/svgFilter2.js"
+
       const MODERN_VARIANTS = [
         { id: "modern-webp-8", label: "webp @ 8px (next.js)", format: "webp", size: 8 },
         { id: "modern-avif-8", label: "avif @ 8px", format: "avif", size: 8 },
@@ -323,8 +375,10 @@
       const VARIANTS = [...STATIC_VARIANTS.slice(0, 1), ...MODERN_VARIANTS, ...STATIC_VARIANTS.slice(1)]
 
       const modernPreviewCache = new Map()
+      const imageDataUrlCache = new Map()
       const qualityOptions = []
       const variantIds = new Set(VARIANTS.map((variant) => variant.id))
+      const BLUR_MODES = new Set(["backdrop", "filter", "svg-filter", "nextjs-blur", "sharp"])
 
       function formatBytes(bytes) {
         if (bytes < 1000) return `${bytes} B`
@@ -368,6 +422,11 @@
         const num = Number(value)
         if (!Number.isFinite(num)) return fallback
         return Math.min(max, Math.max(min, Math.round(num)))
+      }
+
+      function normalizeBlurMode(value) {
+        if (value === "css") return "backdrop"
+        return BLUR_MODES.has(value) ? value : "backdrop"
       }
 
       function syncQueryParams(state) {
@@ -414,8 +473,8 @@
         }
 
         const blurMode = params.get("blurMode")
-        if (blurMode === "css" || blurMode === "sharp") {
-          state.blurMode = blurMode
+        if (blurMode) {
+          state.blurMode = normalizeBlurMode(blurMode)
         }
 
         const sharpBlurLevel = params.get("sharpBlurLevel")
@@ -504,7 +563,7 @@
           String(variant.format === "webp" ? state.webpQuality : state.avifQuality)
         )
 
-        const blurMode = state.blurMode
+        const blurMode = normalizeBlurMode(state.blurMode)
         const sharpBlurLevel = blurMode === "sharp" ? state.sharpBlurLevel : "0"
         params.set("sharpBlurLevel", sharpBlurLevel)
         params.set(
@@ -512,7 +571,7 @@
           sharpBlurLevel === "0" ? "placeholder" : state.sharpBlurTarget
         )
 
-        if (blurMode === "css" || (blurMode === "sharp" && sharpBlurLevel === "0")) {
+        if (blurMode !== "sharp" || (blurMode === "sharp" && sharpBlurLevel === "0")) {
           params.set("avifLossless", String(state.avifLossless))
           params.set(
             "avifChromaSubsampling",
@@ -554,28 +613,135 @@
       function applyCssBlur(target, cssBlurPx) {
         if (cssBlurPx > 0) {
           target.style.filter = `blur(${cssBlurPx}px)`
-          target.style.transform = "scale(1.08)"
+          target.style.transform = `scale(${1 + cssBlurPx * 0.02})`
         } else {
           target.style.removeProperty("filter")
           target.style.removeProperty("transform")
         }
       }
 
-      function updateCssBlurLive(state) {
-        const wrappers = document.querySelectorAll("[data-css-overlay='1']")
-        for (const wrapper of wrappers) {
-          if (state.cssBlurPx > 0) {
-            wrapper.classList.add("preview-wrapper-lqip")
-            wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
-          } else {
-            wrapper.classList.remove("preview-wrapper-lqip")
-            wrapper.style.removeProperty("--css-blur")
+      function cssUrl(url) {
+        return `url("${url.replace(/"/g, '\\"')}")`
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.onerror = () => reject(reader.error || new Error("Failed to read image blob"))
+          reader.readAsDataURL(blob)
+        })
+      }
+
+      async function getImageDataUrl(sourceUrl) {
+        if (!sourceUrl) return null
+        if (sourceUrl.startsWith("data:")) return sourceUrl
+        const cached = imageDataUrlCache.get(sourceUrl)
+        if (cached) return cached
+        const promise = (async () => {
+          const response = await fetch(sourceUrl)
+          if (!response.ok) {
+            throw new Error(`Failed to load source image (${response.status})`)
           }
+          const blob = await response.blob()
+          return blobToDataUrl(blob)
+        })()
+        imageDataUrlCache.set(sourceUrl, promise)
+        return promise
+      }
+
+      function getSourceImageUrl(element) {
+        if (!element) return null
+        if (element.tagName === "IMG") {
+          return element.currentSrc || element.src || null
+        }
+        if (element.tagName === "PICTURE") {
+          const img = element.querySelector("img")
+          return img ? img.currentSrc || img.src || null : null
+        }
+        const bg = element.style.backgroundImage
+        if (!bg || bg === "none") return null
+        const match = bg.match(/^url\((['"]?)(.*)\1\)$/)
+        return match ? match[2] : null
+      }
+
+      function clearBlurPresentation(wrapper, sourceEl) {
+        wrapper.classList.remove("preview-wrapper-lqip")
+        wrapper.style.removeProperty("--css-blur")
+        sourceEl.dataset.cssFilter = "0"
+        applyCssBlur(sourceEl, 0)
+        const overlay = wrapper.querySelector(".blur-overlay")
+        if (overlay) {
+          overlay.remove()
+        }
+      }
+
+      function setSvgFilterBlurAmount(cssBlurPx) {
+        const svgBlurNode = document.querySelector("#svgFilterBlur feGaussianBlur")
+        if (svgBlurNode) {
+          svgBlurNode.setAttribute("stdDeviation", String(cssBlurPx))
+        }
+      }
+
+      async function applyBlurPresentation(wrapper, sourceEl, image, state) {
+        const renderToken = String(Number(wrapper.dataset.blurRenderToken || "0") + 1)
+        wrapper.dataset.blurRenderToken = renderToken
+        clearBlurPresentation(wrapper, sourceEl)
+        if (state.cssBlurPx <= 0) return
+
+        const blurMode = normalizeBlurMode(state.blurMode)
+        if (blurMode === "sharp") return
+
+        if (blurMode === "backdrop") {
+          wrapper.classList.add("preview-wrapper-lqip")
+          wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
+          return
         }
 
-        const filterTargets = document.querySelectorAll("[data-css-filter='1']")
-        for (const target of filterTargets) {
-          applyCssBlur(target, state.cssBlurPx)
+        if (blurMode === "filter") {
+          sourceEl.dataset.cssFilter = "1"
+          applyCssBlur(sourceEl, state.cssBlurPx)
+          return
+        }
+
+        const sourceUrl = getSourceImageUrl(sourceEl)
+        if (!sourceUrl) return
+        const sourceDataUrl = await getImageDataUrl(sourceUrl).catch(() => null)
+        if (!sourceDataUrl || wrapper.dataset.blurRenderToken !== renderToken) return
+
+        const overlay = document.createElement("div")
+        overlay.className = "blur-overlay"
+
+        if (blurMode === "svg-filter") {
+          setSvgFilterBlurAmount(state.cssBlurPx)
+          const encodedSvg = svgBlurImage(
+            sourceDataUrl,
+            image.dimensions.width,
+            image.dimensions.height,
+            state.cssBlurPx
+          )
+          overlay.style.backgroundImage = cssUrl(`data:image/svg+xml;charset=utf-8,${encodedSvg}`)
+          overlay.style.filter = "url(#svgFilterBlur)"
+          if (wrapper.dataset.blurRenderToken !== renderToken) return
+          wrapper.appendChild(overlay)
+          return
+        }
+
+        if (blurMode === "nextjs-blur") {
+          setSvgFilterBlurAmount(state.cssBlurPx)
+          const nextjsSvg = getImageBlurSvg({
+            widthInt: image.dimensions.width,
+            heightInt: image.dimensions.height,
+            blurWidth: image.dimensions.width,
+            blurHeight: image.dimensions.height,
+            blurDataURL: sourceDataUrl,
+            objectFit: "cover",
+            blurStd: state.cssBlurPx
+          })
+          overlay.style.backgroundImage = cssUrl(`data:image/svg+xml;charset=utf-8,${nextjsSvg}`)
+          overlay.style.filter = "url(#svgFilterBlur)"
+          if (wrapper.dataset.blurRenderToken !== renderToken) return
+          wrapper.appendChild(overlay)
         }
       }
 
@@ -599,6 +765,14 @@
         sizeLabel.className = "size-below"
         sizeLabel.textContent = "..."
         return sizeLabel
+      }
+
+      function getRowAnchorId(image, index) {
+        const slug = String(image.filename || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+        return `row-${index + 1}-${slug || "image"}`
       }
 
       function setSizeLabel(sizeLabel, bytes, strippedBytes = null) {
@@ -635,7 +809,7 @@
         }
       }
 
-      function renderStaticCell(cell, image, variant, result, state) {
+      function renderStaticCell(cell, image, variant, result, state, row) {
         const wrapper = document.createElement("div")
         wrapper.className = "preview-wrapper"
         wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
@@ -646,15 +820,17 @@
           img.className = "preview"
           img.src = `processed/${result.name}`
           img.alt = result.name
-          wrapper.appendChild(img)
+          const anchor = document.createElement("a")
+          anchor.className = "preview-anchor"
+          anchor.href = `#${row.id}`
+          anchor.setAttribute("aria-label", `Anchor row for ${image.filename}`)
+          anchor.appendChild(img)
+          wrapper.appendChild(anchor)
           setSizeLabel(sizeLabel, result.sizeBytes)
         } else if (variant.type === "css-lqip") {
           const preview = document.createElement("picture")
           preview.className = "css-lqip-preview"
           preview.style.setProperty("--lqip", result.lqip)
-          preview.dataset.cssFilter = "1"
-          applyCssBlur(preview, state.cssBlurPx)
-
           const img = document.createElement("img")
           img.src = `processed/${image.thumbnail.name}`
           img.alt = `${image.filename}-css-lqip`
@@ -665,8 +841,6 @@
           const preview = document.createElement("div")
           preview.className = "css-preview"
           preview.setAttribute("style", result.css)
-          preview.dataset.cssFilter = "1"
-          applyCssBlur(preview, state.cssBlurPx)
           wrapper.appendChild(preview)
           setSizeLabel(sizeLabel, result.sizeBytes)
         }
@@ -685,16 +859,13 @@
         wrapper.appendChild(img)
         const sizeLabel = createSizeLabel()
 
-        if (state.blurMode === "css" && state.cssBlurPx > 0) {
-          wrapper.dataset.cssOverlay = "1"
-          wrapper.classList.add("preview-wrapper-lqip")
-          wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
-        }
+        void applyBlurPresentation(wrapper, img, image, state)
 
         const url = modernUrl(image, variant, state)
         loadModernPreview(url)
           .then(({ objectUrl, sizeBytes, strippedBytes }) => {
             img.src = objectUrl
+            void applyBlurPresentation(wrapper, img, image, state)
             const displayStrippedBytes =
               variant.format === "avif" ? strippedBytes : null
             setSizeLabel(sizeLabel, sizeBytes, displayStrippedBytes)
@@ -715,8 +886,9 @@
 
       function renderRows(images, visibleVariants, state) {
         const tbody = document.querySelector("#rows")
-        for (const image of images) {
+        for (const [index, image] of images.entries()) {
           const row = document.createElement("tr")
+          row.id = getRowAnchorId(image, index)
           for (const variant of visibleVariants) {
             const cell = document.createElement("td")
             if (variant.selected) cell.classList.add("selected")
@@ -728,7 +900,7 @@
               if (!result) {
                 cell.textContent = "-"
               } else {
-                renderStaticCell(cell, image, variant, result, state)
+                renderStaticCell(cell, image, variant, result, state, row)
               }
             }
 
@@ -765,7 +937,7 @@
         }
       }
 
-      function setupControls({ controlsConfig, state, onChange, onSync }) {
+      function setupControls({ controlsConfig, state, onChange }) {
         const controlsRoot = document.querySelector("#controls")
         const webpQualityEl = document.querySelector("#webp-quality")
         const avifQualityEl = document.querySelector("#avif-quality")
@@ -820,14 +992,14 @@
 
         function syncDisabled() {
           const sharpMode = state.blurMode === "sharp"
-          const cssMode = state.blurMode === "css"
+          const clientMode = !sharpMode
           sharpBlurTargetEl.disabled = !sharpMode
           sharpBlurLevelEl.disabled = !sharpMode
           for (const element of document.querySelectorAll(".sharp-only")) {
             element.hidden = !sharpMode
           }
           for (const element of document.querySelectorAll(".quality-options")) {
-            element.hidden = !(cssMode || (sharpMode && state.sharpBlurLevel === "0"))
+            element.hidden = !(clientMode || (sharpMode && state.sharpBlurLevel === "0"))
           }
         }
 
@@ -846,7 +1018,7 @@
           onChange()
         })
         blurModeEl.addEventListener("change", () => {
-          state.blurMode = blurModeEl.value
+          state.blurMode = normalizeBlurMode(blurModeEl.value)
           syncDisabled()
           onChange()
         })
@@ -858,8 +1030,7 @@
         cssBlurEl.addEventListener("input", () => {
           state.cssBlurPx = Number(cssBlurEl.value)
           cssBlurValueEl.textContent = `${state.cssBlurPx}px`
-          updateCssBlurLive(state)
-          onSync()
+          onChange()
         })
 
         for (const [el, key] of [
@@ -911,7 +1082,7 @@
             webpQuality: defaults.webpQuality,
             avifQuality: defaults.avifQuality,
             sharpBlurLevel: defaults.sharpBlurLevel,
-            blurMode: defaults.blurMode,
+            blurMode: normalizeBlurMode(defaults.blurMode),
             sharpBlurTarget: defaults.sharpBlurTarget,
             cssBlurPx: defaults.cssBlurPx,
             avifLossless: defaults.avifLossless,
@@ -940,8 +1111,7 @@
           setupControls({
             controlsConfig,
             state,
-            onChange: () => rerender(true),
-            onSync: () => syncQueryParams(state)
+            onChange: () => rerender(true)
           })
 
           rerender()

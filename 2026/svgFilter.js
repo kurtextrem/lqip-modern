@@ -9,8 +9,9 @@ export function getImageBlurSvg({
 	blurHeight,
 	blurDataURL,
 	objectFit,
+	blurStd = 20,
 }) {
-	const std = 20;
+	const std = Math.max(0, Number.isFinite(blurStd) ? blurStd : 20);
 	const svgWidth = blurWidth ? blurWidth * 40 : widthInt;
 	const svgHeight = blurHeight ? blurHeight * 40 : heightInt;
 

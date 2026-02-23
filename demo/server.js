@@ -393,10 +393,13 @@ async function handleModern(req, res, url) {
 function serveStatic(req, res, url) {
 	let pathname = decodeURIComponent(url.pathname);
 	if (pathname === "/") pathname = "/index.html";
-	const safePath = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, "");
-	const filePath = path.join(__dirname, safePath);
-
-	if (!filePath.startsWith(__dirname)) {
+	const projectRoot = path.resolve(__dirname, "..");
+	const normalizedPath = path.posix.normalize(pathname);
+	const rootDir = normalizedPath.startsWith("/2026/") ? projectRoot : __dirname;
+	const relativePath = normalizedPath.replace(/^\/+/, "");
+	const filePath = path.resolve(rootDir, relativePath);
+	const allowedPrefix = `${rootDir}${path.sep}`;
+	if (filePath !== rootDir && !filePath.startsWith(allowedPrefix)) {
 		res.statusCode = 403;
 		res.end("Forbidden");
 		return;
@@ -415,7 +418,7 @@ function serveStatic(req, res, url) {
 
 const server = http.createServer(async (req, res) => {
 	try {
-		const url = new URL(req.url, `http://${host}:${port}`);
+		const url = new URL(req.url ?? "/", `http://${host}:${port}`);
 		if (url.pathname === "/api/modern") {
 			await handleModern(req, res, url);
 			return;
