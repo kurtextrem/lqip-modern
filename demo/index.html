@@ -176,18 +176,18 @@
     <div id="controls" class="controls" hidden>
       <label>
         WebP quality <span id="webp-quality-value">50</span>
-        <input id="webp-quality" type="range" min="0" max="5" step="1" value="1" />
+        <input id="webp-quality" type="range" min="0" max="7" step="1" value="1" />
       </label>
 
       <label>
         AVIF quality <span id="avif-quality-value">70</span>
-        <input id="avif-quality" type="range" min="0" max="5" step="1" value="2" />
+        <input id="avif-quality" type="range" min="0" max="7" step="1" value="2" />
       </label>
 
       <label>
         Blur mode
         <select id="blur-mode">
-          <option value="css">CSS blur</option>
+          <option value="css" selected>CSS blur</option>
           <option value="sharp">Sharp blur in image bytes</option>
         </select>
       </label>
@@ -211,10 +211,10 @@
         <span class="helper">Seamless live update from 0px to 40px.</span>
       </label>
 
-      <div class="group wide sharp-only">
+      <div class="group wide quality-options">
         <strong>Quality options</strong>
         <span class="helper"
-          >Only used when blur mode is sharp and sharp blur level is none.</span
+          >Only used when blur mode is CSS or when sharp blur level is none.</span
         >
         <div class="checkbox-grid">
           <label><input id="avif-lossless" type="checkbox" /> AVIF lossless</label>
@@ -273,7 +273,7 @@
 
     <script type="module">
       const MODERN_VARIANTS = [
-        { id: "modern-webp-8", label: "webp @ 8px", format: "webp", size: 8 },
+        { id: "modern-webp-8", label: "webp @ 8px (next.js)", format: "webp", size: 8 },
         { id: "modern-avif-8", label: "avif @ 8px", format: "avif", size: 8 },
         {
           id: "modern-webp-16",
@@ -512,7 +512,7 @@
           sharpBlurLevel === "0" ? "placeholder" : state.sharpBlurTarget
         )
 
-        if (blurMode === "sharp" && sharpBlurLevel === "0") {
+        if (blurMode === "css" || (blurMode === "sharp" && sharpBlurLevel === "0")) {
           params.set("avifLossless", String(state.avifLossless))
           params.set(
             "avifChromaSubsampling",
@@ -540,7 +540,13 @@
 
         const blob = await response.blob()
         const objectUrl = URL.createObjectURL(blob)
-        const value = { objectUrl, sizeBytes: blob.size }
+        const strippedBytesHeader = response.headers.get("X-Avif-Stripped-Bytes")
+        const strippedBytes = strippedBytesHeader === null ? null : Number(strippedBytesHeader)
+        const value = {
+          objectUrl,
+          sizeBytes: blob.size,
+          strippedBytes: Number.isFinite(strippedBytes) ? strippedBytes : null
+        }
         modernPreviewCache.set(url, value)
         return value
       }
@@ -595,9 +601,13 @@
         return sizeLabel
       }
 
-      function setSizeLabel(sizeLabel, bytes) {
+      function setSizeLabel(sizeLabel, bytes, strippedBytes = null) {
         sizeLabel.dataset.sizeBytes = String(bytes)
-        sizeLabel.dataset.baseText = formatBytes(bytes)
+        const strippedText =
+          strippedBytes !== null && Number.isFinite(strippedBytes)
+            ? ` (${formatBytes(strippedBytes)})`
+            : ""
+        sizeLabel.dataset.baseText = `${formatBytes(bytes)}${strippedText}`
         sizeLabel.textContent = sizeLabel.dataset.baseText
       }
 
@@ -683,9 +693,11 @@
 
         const url = modernUrl(image, variant, state)
         loadModernPreview(url)
-          .then(({ objectUrl, sizeBytes }) => {
+          .then(({ objectUrl, sizeBytes, strippedBytes }) => {
             img.src = objectUrl
-            setSizeLabel(sizeLabel, sizeBytes)
+            const displayStrippedBytes =
+              variant.format === "avif" ? strippedBytes : null
+            setSizeLabel(sizeLabel, sizeBytes, displayStrippedBytes)
             wrapper.classList.remove("is-loading")
             updateRowTrophy(row)
           })
@@ -808,10 +820,14 @@
 
         function syncDisabled() {
           const sharpMode = state.blurMode === "sharp"
+          const cssMode = state.blurMode === "css"
           sharpBlurTargetEl.disabled = !sharpMode
           sharpBlurLevelEl.disabled = !sharpMode
           for (const element of document.querySelectorAll(".sharp-only")) {
             element.hidden = !sharpMode
+          }
+          for (const element of document.querySelectorAll(".quality-options")) {
+            element.hidden = !(cssMode || (sharpMode && state.sharpBlurLevel === "0"))
           }
         }
 
@@ -915,14 +931,16 @@
 
           hydrateStateFromQuery(state, controlsConfig)
 
-          const rerender = () => {
+          const rerender = (syncQuery = false) => {
             renderTable(images, state)
-            syncQueryParams(state)
+            if (syncQuery) {
+              syncQueryParams(state)
+            }
           }
           setupControls({
             controlsConfig,
             state,
-            onChange: rerender,
+            onChange: () => rerender(true),
             onSync: () => syncQueryParams(state)
           })
 

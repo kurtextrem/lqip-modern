@@ -19,7 +19,7 @@ const processedDir = path.join(__dirname, "processed");
 const outputPath = path.join(__dirname, "dataset.json");
 
 const MODERN_SIZES = [8, 16, 32];
-const QUALITY_OPTIONS = [20, 50, 70, 80, 90, 100];
+const QUALITY_OPTIONS = [20, 50, 60, 70, 75, 80, 90, 100];
 const BLUR_LEVELS = [
 	{ id: "0", label: "none", sharpSigma: 0 },
 	{ id: "1", label: "low", sharpSigma: 1 },
@@ -284,10 +284,10 @@ async function generate() {
 			blurLevels: BLUR_LEVELS,
 			blurTargets: BLUR_TARGETS,
 			defaults: {
-				webpQuality: 50,
+				webpQuality: 70,
 				avifQuality: 70,
 				sharpBlurLevel: "0",
-				blurMode: "sharp",
+				blurMode: "css",
 				sharpBlurTarget: "placeholder",
 				cssBlurPx: 20,
 				avifLossless: false,

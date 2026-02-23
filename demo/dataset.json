@@ -8,7 +8,9 @@
     "qualityOptions": [
       20,
       50,
+      60,
       70,
+      75,
       80,
       90,
       100
@@ -40,10 +42,10 @@
       "original"
     ],
     "defaults": {
-      "webpQuality": 50,
+      "webpQuality": 70,
       "avifQuality": 70,
       "sharpBlurLevel": "0",
-      "blurMode": "sharp",
+      "blurMode": "css",
       "sharpBlurTarget": "placeholder",
       "cssBlurPx": 20,
       "avifLossless": false,
