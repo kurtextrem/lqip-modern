@@ -226,6 +226,7 @@
         <select id="blur-mode">
           <option value="backdrop" selected>Backdrop-filter blur</option>
           <option value="filter">Filter blur</option>
+          <option value="svg-filter-css">SVG filter (CSS)</option>
           <option value="svg-filter">SVG blur (default)</option>
           <option value="nextjs-blur">SVG blur (nextjs blur)</option>
           <option value="sharp">Sharp blur in image bytes</option>
@@ -312,7 +313,7 @@
     </table>
 
     <svg width="0" height="0" style="position: absolute; visibility: hidden">
-      <filter id="svgFilterBlur" color-interpolation-filters="sRGB">
+      <filter id="svgBlur" color-interpolation-filters="sRGB">
         <feGaussianBlur stdDeviation="20"></feGaussianBlur>
         <feComponentTransfer>
           <feFuncA type="discrete" tableValues="1 1"></feFuncA>
@@ -378,7 +379,14 @@
       const imageDataUrlCache = new Map()
       const qualityOptions = []
       const variantIds = new Set(VARIANTS.map((variant) => variant.id))
-      const BLUR_MODES = new Set(["backdrop", "filter", "svg-filter", "nextjs-blur", "sharp"])
+      const BLUR_MODES = new Set([
+        "backdrop",
+        "filter",
+        "svg-filter-css",
+        "svg-filter",
+        "nextjs-blur",
+        "sharp"
+      ])
 
       function formatBytes(bytes) {
         if (bytes < 1000) return `${bytes} B`
@@ -571,6 +579,10 @@
           sharpBlurLevel === "0" ? "placeholder" : state.sharpBlurTarget
         )
 
+        if (blurMode === "svg-filter-css" || blurMode === "svg-filter" || blurMode === "nextjs-blur") {
+          params.set("clientBlurKey", String(state.cssBlurPx))
+        }
+
         if (blurMode !== "sharp" || (blurMode === "sharp" && sharpBlurLevel === "0")) {
           params.set("avifLossless", String(state.avifLossless))
           params.set(
@@ -677,7 +689,7 @@
       }
 
       function setSvgFilterBlurAmount(cssBlurPx) {
-        const svgBlurNode = document.querySelector("#svgFilterBlur feGaussianBlur")
+        const svgBlurNode = document.querySelector("#svgBlur feGaussianBlur")
         if (svgBlurNode) {
           svgBlurNode.setAttribute("stdDeviation", String(cssBlurPx))
         }
@@ -709,26 +721,38 @@
         const sourceDataUrl = await getImageDataUrl(sourceUrl).catch(() => null)
         if (!sourceDataUrl || wrapper.dataset.blurRenderToken !== renderToken) return
 
-        const overlay = document.createElement("div")
-        overlay.className = "blur-overlay"
-
-        if (blurMode === "svg-filter") {
+        if (blurMode === "svg-filter-css") {
+          const overlay = document.createElement("div")
+          overlay.className = "blur-overlay"
           setSvgFilterBlurAmount(state.cssBlurPx)
           const encodedSvg = svgBlurImage(
             sourceDataUrl,
             image.dimensions.width,
             image.dimensions.height,
-            state.cssBlurPx
+            0
           )
           overlay.style.backgroundImage = cssUrl(`data:image/svg+xml;charset=utf-8,${encodedSvg}`)
-          overlay.style.filter = "url(#svgFilterBlur)"
+          overlay.style.filter = "url(#svgBlur)"
           if (wrapper.dataset.blurRenderToken !== renderToken) return
           wrapper.appendChild(overlay)
           return
         }
 
+        if (blurMode === "svg-filter") {
+          const encodedSvg = encodeURIComponent(
+            svgBlurImage(
+              sourceDataUrl,
+              image.dimensions.width,
+              image.dimensions.height,
+              state.cssBlurPx
+            )
+          )
+          if (wrapper.dataset.blurRenderToken !== renderToken) return
+          sourceEl.src = `data:image/svg+xml;charset=utf-8,${encodedSvg}`
+          return
+        }
+
         if (blurMode === "nextjs-blur") {
-          setSvgFilterBlurAmount(state.cssBlurPx)
           const nextjsSvg = getImageBlurSvg({
             widthInt: image.dimensions.width,
             heightInt: image.dimensions.height,
@@ -738,10 +762,8 @@
             objectFit: "cover",
             blurStd: state.cssBlurPx
           })
-          overlay.style.backgroundImage = cssUrl(`data:image/svg+xml;charset=utf-8,${nextjsSvg}`)
-          overlay.style.filter = "url(#svgFilterBlur)"
           if (wrapper.dataset.blurRenderToken !== renderToken) return
-          wrapper.appendChild(overlay)
+          sourceEl.src = `data:image/svg+xml;charset=utf-8,${nextjsSvg}`
         }
       }
 
