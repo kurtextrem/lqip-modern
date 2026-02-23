@@ -42,15 +42,16 @@
     "defaults": {
       "webpQuality": 50,
       "avifQuality": 70,
-      "sharpBlurLevel": "2",
-      "blurMode": "css",
+      "sharpBlurLevel": "0",
+      "blurMode": "sharp",
       "sharpBlurTarget": "placeholder",
       "cssBlurPx": 20,
       "avifLossless": false,
-      "avifChromaSubsampling444": false,
+      "avifChromaSubsampling444": true,
+      "avifBitdepth": 8,
       "webpSmartSubsample": true,
       "webpSmartDeblock": false,
-      "webpAlphaQuality": false,
+      "webpAlphaQuality": 100,
       "webpLossless": false,
       "webpNearLossless": false
     }

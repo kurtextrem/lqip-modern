@@ -30,9 +30,10 @@ function defaultOptionState() {
 	return {
 		avifLossless: false,
 		avifChromaSubsampling: "4:2:0",
+		avifBitdepth: 8,
 		webpSmartSubsample: true,
 		webpSmartDeblock: false,
-		webpAlphaQuality: false,
+		webpAlphaQuality: 100,
 		webpLossless: false,
 		webpNearLossless: false,
 	};
@@ -42,6 +43,7 @@ function optionsSuffix({
 	format,
 	avifLossless,
 	avifChromaSubsampling,
+	avifBitdepth,
 	webpSmartSubsample,
 	webpSmartDeblock,
 	webpAlphaQuality,
@@ -55,11 +57,13 @@ function optionsSuffix({
 		payload = {
 			avifLossless,
 			avifChromaSubsampling,
+			avifBitdepth,
 		};
 
 		if (
 			payload.avifLossless === defaults.avifLossless &&
-			payload.avifChromaSubsampling === defaults.avifChromaSubsampling
+			payload.avifChromaSubsampling === defaults.avifChromaSubsampling &&
+			payload.avifBitdepth === defaults.avifBitdepth
 		) {
 			return "";
 		}
@@ -87,7 +91,7 @@ function optionsSuffix({
 		.createHash("sha256")
 		.update(JSON.stringify(payload))
 		.digest("hex")
-		slice(0, 8);
+		.slice(0, 8);
 	return `-opts-${hash}`;
 }
 
@@ -100,6 +104,7 @@ function modernOutputName({
 	sharpBlurTarget,
 	avifLossless,
 	avifChromaSubsampling,
+	avifBitdepth,
 	webpSmartSubsample,
 	webpSmartDeblock,
 	webpAlphaQuality,
@@ -113,6 +118,7 @@ function modernOutputName({
 					format,
 					avifLossless,
 					avifChromaSubsampling,
+					avifBitdepth,
 					webpSmartSubsample,
 					webpSmartDeblock,
 					webpAlphaQuality,
@@ -181,6 +187,10 @@ async function handleModern(req, res, url) {
 	const avifLossless = parseBool(url.searchParams.get("avifLossless"), false);
 	const avifChromaSubsampling =
 		url.searchParams.get("avifChromaSubsampling") === "444" ? "4:4:4" : "4:2:0";
+	const avifBitdepthParam = Number(url.searchParams.get("avifBitdepth"));
+	const avifBitdepth = [8, 10, 12].includes(avifBitdepthParam)
+		? avifBitdepthParam
+		: 8;
 
 	const webpSmartSubsample = parseBool(
 		url.searchParams.get("webpSmartSubsample"),
@@ -190,9 +200,11 @@ async function handleModern(req, res, url) {
 		url.searchParams.get("webpSmartDeblock"),
 		false,
 	);
-	const webpAlphaQuality = parseBool(
+	const webpAlphaQuality = clampNumber(
 		url.searchParams.get("webpAlphaQuality"),
-		false,
+		0,
+		100,
+		100,
 	);
 	const webpLossless = parseBool(url.searchParams.get("webpLossless"), false);
 	const webpNearLossless = parseBool(
@@ -210,6 +222,7 @@ async function handleModern(req, res, url) {
 		sharpBlurTarget,
 		avifLossless,
 		avifChromaSubsampling,
+		avifBitdepth,
 		webpSmartSubsample,
 		webpSmartDeblock,
 		webpAlphaQuality,
@@ -225,6 +238,7 @@ async function handleModern(req, res, url) {
 		sharpBlurTarget,
 		avifLossless,
 		avifChromaSubsampling,
+		avifBitdepth,
 		webpSmartSubsample,
 		webpSmartDeblock,
 		webpAlphaQuality,
@@ -278,7 +292,7 @@ async function handleModern(req, res, url) {
 			nearLossless: webpNearLossless,
 			smartSubsample: webpSmartSubsample,
 			smartDeblock: webpSmartDeblock,
-			...(webpAlphaQuality ? { alphaQuality: 100 } : {}),
+			alphaQuality: webpAlphaQuality,
 		});
 		contentType = "image/webp";
 	} else {
@@ -286,6 +300,7 @@ async function handleModern(req, res, url) {
 			quality,
 			lossless: avifLossless,
 			chromaSubsampling: avifChromaSubsampling,
+			bitdepth: avifBitdepth,
 			effort: 4,
 		});
 		contentType = "image/avif";

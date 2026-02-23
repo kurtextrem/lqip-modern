@@ -47,10 +47,6 @@
         padding: 0.5rem 0;
       }
 
-      .selected {
-        background: #0a5f0a;
-      }
-
       .preview-wrapper {
         position: relative;
         height: 0;
@@ -216,15 +212,23 @@
       </label>
 
       <div class="group wide sharp-only">
-        <strong>0px sharp toggles</strong>
+        <strong>Quality options</strong>
         <span class="helper"
           >Only used when blur mode is sharp and sharp blur level is none.</span
         >
         <div class="checkbox-grid">
           <label><input id="avif-lossless" type="checkbox" /> AVIF lossless</label>
           <label
-            ><input id="avif-chroma-444" type="checkbox" /> AVIF chroma
-            4:4:4</label
+            ><input id="avif-chroma-444" type="checkbox" checked /> AVIF chroma
+            4:4:4 (untick to use 4:2:0)</label
+          >
+          <label
+            >AVIF bitdepth
+            <select id="avif-bitdepth">
+              <option value="8">8-bit</option>
+              <option value="10">10-bit</option>
+              <option value="12">12-bit</option>
+            </select></label
           >
           <label
             ><input id="webp-smart-subsample" type="checkbox" checked /> WebP
@@ -235,8 +239,16 @@
             smartDeblock</label
           >
           <label
-            ><input id="webp-alpha-quality" type="checkbox" /> WebP
-            alphaQuality=100</label
+            >WebP alpha quality <span id="webp-alpha-quality-value">100</span>
+            <input
+              id="webp-alpha-quality"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="100"
+            />
+          </label
           >
           <label><input id="webp-lossless" type="checkbox" /> WebP lossless</label>
           <label
@@ -368,13 +380,11 @@
         params.set("cssBlurPx", String(state.cssBlurPx))
 
         params.set("avifLossless", state.avifLossless ? "1" : "0")
-        params.set(
-          "avifChromaSubsampling444",
-          state.avifChromaSubsampling444 ? "1" : "0"
-        )
+        params.set("avifChromaSubsampling", state.avifChromaSubsampling444 ? "444" : "420")
+        params.set("avifBitdepth", String(state.avifBitdepth))
         params.set("webpSmartSubsample", state.webpSmartSubsample ? "1" : "0")
         params.set("webpSmartDeblock", state.webpSmartDeblock ? "1" : "0")
-        params.set("webpAlphaQuality", state.webpAlphaQuality ? "1" : "0")
+        params.set("webpAlphaQuality", String(state.webpAlphaQuality))
         params.set("webpLossless", state.webpLossless ? "1" : "0")
         params.set("webpNearLossless", state.webpNearLossless ? "1" : "0")
 
@@ -429,10 +439,19 @@
           params.get("avifLossless"),
           state.avifLossless
         )
-        state.avifChromaSubsampling444 = parseBooleanQuery(
-          params.get("avifChromaSubsampling444"),
-          state.avifChromaSubsampling444
-        )
+        const avifChromaSubsampling = params.get("avifChromaSubsampling")
+        if (avifChromaSubsampling === "444" || avifChromaSubsampling === "420") {
+          state.avifChromaSubsampling444 = avifChromaSubsampling === "444"
+        } else {
+          state.avifChromaSubsampling444 = parseBooleanQuery(
+            params.get("avifChromaSubsampling444"),
+            state.avifChromaSubsampling444
+          )
+        }
+        state.avifBitdepth = parseIntQuery(params.get("avifBitdepth"), state.avifBitdepth, 8, 12)
+        if (![8, 10, 12].includes(state.avifBitdepth)) {
+          state.avifBitdepth = 8
+        }
         state.webpSmartSubsample = parseBooleanQuery(
           params.get("webpSmartSubsample"),
           state.webpSmartSubsample
@@ -441,10 +460,19 @@
           params.get("webpSmartDeblock"),
           state.webpSmartDeblock
         )
-        state.webpAlphaQuality = parseBooleanQuery(
-          params.get("webpAlphaQuality"),
-          state.webpAlphaQuality
-        )
+        const webpAlphaQualityRaw = params.get("webpAlphaQuality")
+        const hasLegacyChromaParam = params.has("avifChromaSubsampling444")
+        if (hasLegacyChromaParam && (webpAlphaQualityRaw === "0" || webpAlphaQualityRaw === "1")) {
+          // Legacy URLs stored this as a boolean toggle, both paths effectively used alphaQuality=100.
+          state.webpAlphaQuality = 100
+        } else {
+          state.webpAlphaQuality = parseIntQuery(
+            webpAlphaQualityRaw,
+            state.webpAlphaQuality,
+            0,
+            100
+          )
+        }
         state.webpLossless = parseBooleanQuery(
           params.get("webpLossless"),
           state.webpLossless
@@ -490,6 +518,7 @@
             "avifChromaSubsampling",
             state.avifChromaSubsampling444 ? "444" : "420"
           )
+          params.set("avifBitdepth", String(state.avifBitdepth))
           params.set("webpSmartSubsample", String(state.webpSmartSubsample))
           params.set("webpSmartDeblock", String(state.webpSmartDeblock))
           params.set("webpAlphaQuality", String(state.webpAlphaQuality))
@@ -738,9 +767,11 @@
 
         const avifLosslessEl = document.querySelector("#avif-lossless")
         const avifChroma444El = document.querySelector("#avif-chroma-444")
+        const avifBitdepthEl = document.querySelector("#avif-bitdepth")
         const webpSmartSubsampleEl = document.querySelector("#webp-smart-subsample")
         const webpSmartDeblockEl = document.querySelector("#webp-smart-deblock")
         const webpAlphaQualityEl = document.querySelector("#webp-alpha-quality")
+        const webpAlphaQualityValueEl = document.querySelector("#webp-alpha-quality-value")
         const webpLosslessEl = document.querySelector("#webp-lossless")
         const webpNearLosslessEl = document.querySelector("#webp-near-lossless")
 
@@ -767,9 +798,11 @@
 
         avifLosslessEl.checked = state.avifLossless
         avifChroma444El.checked = state.avifChromaSubsampling444
+        avifBitdepthEl.value = String(state.avifBitdepth)
         webpSmartSubsampleEl.checked = state.webpSmartSubsample
         webpSmartDeblockEl.checked = state.webpSmartDeblock
-        webpAlphaQualityEl.checked = state.webpAlphaQuality
+        webpAlphaQualityEl.value = String(state.webpAlphaQuality)
+        webpAlphaQualityValueEl.textContent = String(state.webpAlphaQuality)
         webpLosslessEl.checked = state.webpLossless
         webpNearLosslessEl.checked = state.webpNearLossless
 
@@ -818,7 +851,6 @@
           [avifChroma444El, "avifChromaSubsampling444"],
           [webpSmartSubsampleEl, "webpSmartSubsample"],
           [webpSmartDeblockEl, "webpSmartDeblock"],
-          [webpAlphaQualityEl, "webpAlphaQuality"],
           [webpLosslessEl, "webpLossless"],
           [webpNearLosslessEl, "webpNearLossless"]
         ]) {
@@ -827,6 +859,15 @@
             onChange()
           })
         }
+        avifBitdepthEl.addEventListener("change", () => {
+          state.avifBitdepth = Number(avifBitdepthEl.value)
+          onChange()
+        })
+        webpAlphaQualityEl.addEventListener("input", () => {
+          state.webpAlphaQuality = Number(webpAlphaQualityEl.value)
+          webpAlphaQualityValueEl.textContent = String(state.webpAlphaQuality)
+          onChange()
+        })
 
         setupVisibilityControls(state, onChange)
         syncDisabled()
@@ -859,6 +900,7 @@
             cssBlurPx: defaults.cssBlurPx,
             avifLossless: defaults.avifLossless,
             avifChromaSubsampling444: defaults.avifChromaSubsampling444,
+            avifBitdepth: defaults.avifBitdepth,
             webpSmartSubsample: defaults.webpSmartSubsample,
             webpSmartDeblock: defaults.webpSmartDeblock,
             webpAlphaQuality: defaults.webpAlphaQuality,
