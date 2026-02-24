@@ -55,7 +55,7 @@ function benchmarkUrl(page, { technique, blurPx, contentVisibility }) {
 	if (baseUrl) {
 		return `${baseUrl}/benchmarks/${page}?${params.toString()}`;
 	}
-	return `${page}?${params.toString()}`;
+	return `demo/benchmarks/${page}?${params.toString()}`;
 }
 
 function createMatrix() {
@@ -84,7 +84,8 @@ function createReflowConfig() {
 			measurement: {
 				mode: "expression",
 				name: "runtime-ms",
-				expression: "window.tachometerResult",
+				expression:
+					"window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)",
 			},
 			browser: {
 				...BASE_BROWSER,
@@ -112,17 +113,20 @@ function createAnimationConfig() {
 				{
 					mode: "expression",
 					name: "runtime-ms",
-					expression: "window.tachometerResult",
+					expression:
+						"window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)",
 				},
 				{
 					mode: "expression",
 					name: "fps",
-					expression: "window.__benchmarkFps",
+					expression:
+						"window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)",
 				},
 				{
 					mode: "expression",
 					name: "avg-frame-ms",
-					expression: "window.__benchmarkAvgFrameMs",
+					expression:
+						"window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)",
 				},
 			],
 			browser: {

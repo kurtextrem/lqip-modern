@@ -1,0 +1,124 @@
+{
+  "generatedAt": "2026-02-24T10:50:51.657Z",
+  "traceDir": "/Users/jacobgross/Documents/GitHub/lqip-modern/demo/benchmarks/results/reflow-traces",
+  "traceFiles": 2,
+  "benchmarkCount": 2,
+  "benchmarks": [
+    {
+      "name": "backdrop-filter-blur-10-cv-auto",
+      "samples": 1,
+      "totalsMs": {
+        "style": {
+          "meanMs": 5.316,
+          "medianMs": 5.316,
+          "p95Ms": 5.316
+        },
+        "layout": {
+          "meanMs": 1.644,
+          "medianMs": 1.644,
+          "p95Ms": 1.644
+        },
+        "paint": {
+          "meanMs": 177.696,
+          "medianMs": 177.696,
+          "p95Ms": 177.696
+        },
+        "commit": {
+          "meanMs": 1947.742,
+          "medianMs": 1947.742,
+          "p95Ms": 1947.742
+        },
+        "composite": {
+          "meanMs": 544.403,
+          "medianMs": 544.403,
+          "p95Ms": 544.403
+        }
+      },
+      "counts": {
+        "style": {
+          "meanMs": 31,
+          "medianMs": 31,
+          "p95Ms": 31
+        },
+        "layout": {
+          "meanMs": 59,
+          "medianMs": 59,
+          "p95Ms": 59
+        },
+        "paint": {
+          "meanMs": 240,
+          "medianMs": 240,
+          "p95Ms": 240
+        },
+        "commit": {
+          "meanMs": 298,
+          "medianMs": 298,
+          "p95Ms": 298
+        },
+        "composite": {
+          "meanMs": 3,
+          "medianMs": 3,
+          "p95Ms": 3
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-10-cv-off",
+      "samples": 1,
+      "totalsMs": {
+        "style": {
+          "meanMs": 13.465,
+          "medianMs": 13.465,
+          "p95Ms": 13.465
+        },
+        "layout": {
+          "meanMs": 2.234,
+          "medianMs": 2.234,
+          "p95Ms": 2.234
+        },
+        "paint": {
+          "meanMs": 2193.422,
+          "medianMs": 2193.422,
+          "p95Ms": 2193.422
+        },
+        "commit": {
+          "meanMs": 1424.835,
+          "medianMs": 1424.835,
+          "p95Ms": 1424.835
+        },
+        "composite": {
+          "meanMs": 56.009,
+          "medianMs": 56.009,
+          "p95Ms": 56.009
+        }
+      },
+      "counts": {
+        "style": {
+          "meanMs": 30,
+          "medianMs": 30,
+          "p95Ms": 30
+        },
+        "layout": {
+          "meanMs": 50,
+          "medianMs": 50,
+          "p95Ms": 50
+        },
+        "paint": {
+          "meanMs": 280,
+          "medianMs": 280,
+          "p95Ms": 280
+        },
+        "commit": {
+          "meanMs": 334,
+          "medianMs": 334,
+          "p95Ms": 334
+        },
+        "composite": {
+          "meanMs": 3,
+          "medianMs": 3,
+          "p95Ms": 3
+        }
+      }
+    }
+  ]
+}

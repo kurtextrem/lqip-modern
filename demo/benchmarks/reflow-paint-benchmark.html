@@ -14,7 +14,6 @@
 			} catch (error) {
 				const detail = String(error && (error.stack || error.message || error));
 				window.__benchmarkError = detail;
-				window.tachometerResult = 1e12;
 				fetch("/api/benchmark-error", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },

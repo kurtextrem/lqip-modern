@@ -9,22 +9,22 @@
   "benchmarks": [
     {
       "name": "backdrop-filter-blur-10-cv-off",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -55,22 +55,22 @@
     },
     {
       "name": "backdrop-filter-blur-10-cv-auto",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -101,22 +101,22 @@
     },
     {
       "name": "backdrop-filter-blur-20-cv-off",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -147,22 +147,22 @@
     },
     {
       "name": "backdrop-filter-blur-20-cv-auto",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -193,22 +193,22 @@
     },
     {
       "name": "backdrop-filter-blur-40-cv-off",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -239,22 +239,22 @@
     },
     {
       "name": "backdrop-filter-blur-40-cv-auto",
-      "url": "animation-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -285,22 +285,22 @@
     },
     {
       "name": "filter-blur-10-cv-off",
-      "url": "animation-benchmark.html?technique=filter&blur=10&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=10&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -331,22 +331,22 @@
     },
     {
       "name": "filter-blur-10-cv-auto",
-      "url": "animation-benchmark.html?technique=filter&blur=10&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=10&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -377,22 +377,22 @@
     },
     {
       "name": "filter-blur-20-cv-off",
-      "url": "animation-benchmark.html?technique=filter&blur=20&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=20&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -423,22 +423,22 @@
     },
     {
       "name": "filter-blur-20-cv-auto",
-      "url": "animation-benchmark.html?technique=filter&blur=20&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=20&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -469,22 +469,22 @@
     },
     {
       "name": "filter-blur-40-cv-off",
-      "url": "animation-benchmark.html?technique=filter&blur=40&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=40&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -515,22 +515,22 @@
     },
     {
       "name": "filter-blur-40-cv-auto",
-      "url": "animation-benchmark.html?technique=filter&blur=40&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=filter&blur=40&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -561,22 +561,22 @@
     },
     {
       "name": "nextjs-blur-blur-10-cv-off",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -607,22 +607,22 @@
     },
     {
       "name": "nextjs-blur-blur-10-cv-auto",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -653,22 +653,22 @@
     },
     {
       "name": "nextjs-blur-blur-20-cv-off",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -699,22 +699,22 @@
     },
     {
       "name": "nextjs-blur-blur-20-cv-auto",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -745,22 +745,22 @@
     },
     {
       "name": "nextjs-blur-blur-40-cv-off",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -791,22 +791,22 @@
     },
     {
       "name": "nextjs-blur-blur-40-cv-auto",
-      "url": "animation-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -837,22 +837,22 @@
     },
     {
       "name": "svg-blur-blur-10-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=10&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=10&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -883,22 +883,22 @@
     },
     {
       "name": "svg-blur-blur-10-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=10&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=10&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -929,22 +929,22 @@
     },
     {
       "name": "svg-blur-blur-20-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=20&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=20&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -975,22 +975,22 @@
     },
     {
       "name": "svg-blur-blur-20-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=20&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=20&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1021,22 +1021,22 @@
     },
     {
       "name": "svg-blur-blur-40-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=40&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=40&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1067,22 +1067,22 @@
     },
     {
       "name": "svg-blur-blur-40-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur&blur=40&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur&blur=40&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1113,22 +1113,22 @@
     },
     {
       "name": "svg-blur-css-blur-10-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1159,22 +1159,22 @@
     },
     {
       "name": "svg-blur-css-blur-10-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1205,22 +1205,22 @@
     },
     {
       "name": "svg-blur-css-blur-20-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1251,22 +1251,22 @@
     },
     {
       "name": "svg-blur-css-blur-20-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1297,22 +1297,22 @@
     },
     {
       "name": "svg-blur-css-blur-40-cv-off",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=off",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=off",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
@@ -1343,22 +1343,22 @@
     },
     {
       "name": "svg-blur-css-blur-40-cv-auto",
-      "url": "animation-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=auto",
+      "url": "demo/benchmarks/animation-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=auto",
       "measurement": [
         {
           "mode": "expression",
           "name": "runtime-ms",
-          "expression": "window.tachometerResult"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.tachometerResult) && window.tachometerResult > 0 ? window.tachometerResult : undefined)"
         },
         {
           "mode": "expression",
           "name": "fps",
-          "expression": "window.__benchmarkFps"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkFps) && window.__benchmarkFps > 0 ? window.__benchmarkFps : undefined)"
         },
         {
           "mode": "expression",
           "name": "avg-frame-ms",
-          "expression": "window.__benchmarkAvgFrameMs"
+          "expression": "window.__benchmarkError ? undefined : (Number.isFinite(window.__benchmarkAvgFrameMs) && window.__benchmarkAvgFrameMs > 0 ? window.__benchmarkAvgFrameMs : undefined)"
         }
       ],
       "browser": {
