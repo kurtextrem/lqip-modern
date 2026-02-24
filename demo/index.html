@@ -632,8 +632,8 @@
         }
       }
 
-      function cssUrl(url) {
-        return `url("${url.replace(/"/g, '\\"')}")`
+      function encodeSVGForCSS(svg) {
+        return `url('${encodeSVGForURL(svg)}')`
       }
 
       function blobToDataUrl(blob) {
@@ -642,6 +642,23 @@
           reader.onload = () => resolve(reader.result)
           reader.onerror = () => reject(reader.error || new Error("Failed to read image blob"))
           reader.readAsDataURL(blob)
+        })
+      }
+
+      async function decodeImageSrc(src) {
+        const image = new Image()
+        image.decoding = "async"
+        image.src = src
+
+        if (typeof image.decode === "function") {
+          await image.decode()
+          return
+        }
+
+        if (image.complete) return
+        await new Promise((resolve, reject) => {
+          image.onload = resolve
+          image.onerror = () => reject(new Error("Failed to decode image"))
         })
       }
 
@@ -682,6 +699,10 @@
         wrapper.style.removeProperty("--css-blur")
         sourceEl.dataset.cssFilter = "0"
         applyCssBlur(sourceEl, 0)
+        const baseSrc = sourceEl.dataset.baseSrc
+        if (baseSrc && sourceEl.src !== baseSrc) {
+          sourceEl.src = baseSrc
+        }
         const overlay = wrapper.querySelector(".blur-overlay")
         if (overlay) {
           overlay.remove()
@@ -693,6 +714,10 @@
         if (svgBlurNode) {
           svgBlurNode.setAttribute("stdDeviation", String(cssBlurPx))
         }
+      }
+
+      function encodeSVGForURL(svg) {
+        return `data:image/svg+xml,${svg.replaceAll("#", "%23").replaceAll("'", "%27").replaceAll('"', "%22")}`
       }
 
       async function applyBlurPresentation(wrapper, sourceEl, image, state) {
@@ -716,7 +741,7 @@
           return
         }
 
-        const sourceUrl = getSourceImageUrl(sourceEl)
+        const sourceUrl = sourceEl.dataset.baseSrc || getSourceImageUrl(sourceEl)
         if (!sourceUrl) return
         const sourceDataUrl = await getImageDataUrl(sourceUrl).catch(() => null)
         if (!sourceDataUrl || wrapper.dataset.blurRenderToken !== renderToken) return
@@ -731,24 +756,27 @@
             image.dimensions.height,
             0
           )
-          overlay.style.backgroundImage = cssUrl(`data:image/svg+xml;charset=utf-8,${encodedSvg}`)
+          overlay.style.backgroundImage = encodeSVGForCSS(encodedSvg)
           overlay.style.filter = "url(#svgBlur)"
+          overlay.style.transform = `scale(${1 + state.cssBlurPx * 0.02})`
           if (wrapper.dataset.blurRenderToken !== renderToken) return
           wrapper.appendChild(overlay)
           return
         }
 
         if (blurMode === "svg-filter") {
-          const encodedSvg = encodeURIComponent(
-            svgBlurImage(
+          const encodedSvg = svgBlurImage(
               sourceDataUrl,
               image.dimensions.width,
               image.dimensions.height,
               state.cssBlurPx
-            )
           )
+
           if (wrapper.dataset.blurRenderToken !== renderToken) return
-          sourceEl.src = `data:image/svg+xml;charset=utf-8,${encodedSvg}`
+          const nextSrc = encodeSVGForURL(encodedSvg)
+          await decodeImageSrc(nextSrc).catch(() => undefined)
+          if (wrapper.dataset.blurRenderToken !== renderToken) return
+          sourceEl.src = nextSrc
           return
         }
 
@@ -763,7 +791,10 @@
             blurStd: state.cssBlurPx
           })
           if (wrapper.dataset.blurRenderToken !== renderToken) return
-          sourceEl.src = `data:image/svg+xml;charset=utf-8,${nextjsSvg}`
+          const nextSrc = encodeSVGForURL(nextjsSvg)
+          await decodeImageSrc(nextSrc).catch(() => undefined)
+          if (wrapper.dataset.blurRenderToken !== renderToken) return
+          sourceEl.src = nextSrc
         }
       }
 
@@ -874,6 +905,9 @@
       function renderModernCell(cell, image, variant, state, row) {
         const wrapper = document.createElement("div")
         wrapper.className = "preview-wrapper is-loading"
+        wrapper.dataset.modernCell = "1"
+        wrapper.dataset.imageWidth = String(image.dimensions.width)
+        wrapper.dataset.imageHeight = String(image.dimensions.height)
         wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
         const img = document.createElement("img")
         img.className = "preview"
@@ -885,7 +919,9 @@
 
         const url = modernUrl(image, variant, state)
         loadModernPreview(url)
-          .then(({ objectUrl, sizeBytes, strippedBytes }) => {
+          .then(async ({ objectUrl, sizeBytes, strippedBytes }) => {
+            await decodeImageSrc(objectUrl).catch(() => undefined)
+            img.dataset.baseSrc = objectUrl
             img.src = objectUrl
             void applyBlurPresentation(wrapper, img, image, state)
             const displayStrippedBytes =
@@ -959,7 +995,7 @@
         }
       }
 
-      function setupControls({ controlsConfig, state, onChange }) {
+      function setupControls({ controlsConfig, state, onChange, onBlurChange }) {
         const controlsRoot = document.querySelector("#controls")
         const webpQualityEl = document.querySelector("#webp-quality")
         const avifQualityEl = document.querySelector("#avif-quality")
@@ -1052,7 +1088,7 @@
         cssBlurEl.addEventListener("input", () => {
           state.cssBlurPx = Number(cssBlurEl.value)
           cssBlurValueEl.textContent = `${state.cssBlurPx}px`
-          onChange()
+          onBlurChange()
         })
 
         for (const [el, key] of [
@@ -1130,10 +1166,28 @@
               syncQueryParams(state)
             }
           }
+          const updateRenderedBlurOnly = () => {
+            const wrappers = document.querySelectorAll('.preview-wrapper[data-modern-cell="1"]')
+            for (const wrapper of wrappers) {
+              const sourceEl = wrapper.querySelector("img.preview")
+              if (!sourceEl) continue
+              const width = Number(wrapper.dataset.imageWidth)
+              const height = Number(wrapper.dataset.imageHeight)
+              if (!Number.isFinite(width) || !Number.isFinite(height)) continue
+              void applyBlurPresentation(
+                wrapper,
+                sourceEl,
+                { dimensions: { width, height } },
+                state
+              )
+            }
+            syncQueryParams(state)
+          }
           setupControls({
             controlsConfig,
             state,
-            onChange: () => rerender(true)
+            onChange: () => rerender(true),
+            onBlurChange: updateRenderedBlurOnly
           })
 
           rerender()
