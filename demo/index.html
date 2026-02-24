@@ -15,6 +15,8 @@
         scroll-behavior: smooth;
         scroll-snap-type: y mandatory;
         scroll-padding-top: 1rem;
+        --transition-duration: 300ms;
+        --transition-easing: ease-out;
       }
 
       a {
@@ -49,6 +51,65 @@
       th {
         text-align: left;
         padding: 0.75rem;
+        position: relative;
+      }
+
+      .column-header-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .column-header-title {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .column-blur-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .column-blur-toggle {
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #444;
+        background: #222;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: #fff;
+        user-select: none;
+      }
+
+      .column-blur-toggle:hover {
+        background: #333;
+      }
+
+      .column-blur-toggle.active {
+        background: #444;
+        border-color: #666;
+      }
+
+      .column-blur-slider {
+        width: 80px;
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+        outline: none;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+      }
+
+      .column-blur-slider:enabled {
+        opacity: 1;
+        cursor: pointer;
+      }
+
+      .column-blur-slider:disabled {
+        cursor: not-allowed;
       }
 
       td {
@@ -78,6 +139,9 @@
       .preview {
         display: block;
         object-fit: cover;
+        transition: opacity var(--transition-duration) var(--transition-easing),
+          filter var(--transition-duration) var(--transition-easing),
+          transform var(--transition-duration) var(--transition-easing);
       }
 
       .preview-anchor {
@@ -104,6 +168,12 @@
         inset: 0;
         backdrop-filter: blur(var(--css-blur, 20px));
         pointer-events: none;
+        opacity: 1;
+        transition: opacity var(--transition-duration) var(--transition-easing);
+      }
+
+      .preview-wrapper:hover .preview-wrapper-lqip::after {
+        opacity: 0;
       }
 
       .blur-overlay {
@@ -114,6 +184,50 @@
         background-position: center;
         background-repeat: no-repeat;
         transform: scale(1);
+        opacity: 1;
+        transition: opacity var(--transition-duration) var(--transition-easing);
+      }
+
+      .preview-wrapper:hover .blur-overlay {
+        opacity: 0;
+      }
+
+      .preview-wrapper:hover .preview[data-css-filter="1"] {
+        filter: blur(0);
+        transform: scale(1);
+      }
+
+      .thumbnail-overlay {
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .preview-wrapper:hover .thumbnail-overlay {
+        opacity: 1;
+      }
+
+      .preview-wrapper:has(.thumbnail-overlay):hover .preview:not(.thumbnail-overlay) {
+        opacity: 0;
+      }
+
+      .preview-wrapper:has(.thumbnail-overlay):hover .css-lqip-preview {
+        opacity: 0;
+      }
+
+      .preview-wrapper:has(.thumbnail-overlay):hover .css-preview {
+        opacity: 0;
+      }
+
+      .preview-wrapper:has(.thumbnail-overlay):hover .preview[data-css-filter="1"] {
+        filter: blur(0);
+        transform: scale(1);
+        opacity: 0;
+      }
+
+      .css-lqip-preview,
+      .css-preview {
+        transition: opacity var(--transition-duration) var(--transition-easing);
       }
 
       .size-below {
@@ -212,7 +326,7 @@
 
     <div id="controls" class="controls" hidden>
       <label>
-        WebP quality <span id="webp-quality-value">50</span>
+        WebP quality (next.js=70, mux=85) <span id="webp-quality-value">50</span>
         <input id="webp-quality" type="range" min="0" max="7" step="1" value="1" />
       </label>
 
@@ -248,8 +362,24 @@
 
       <label>
         Blur amount <span id="css-blur-value">20px</span>
-        <input id="css-blur" type="range" min="0" max="40" step="1" value="20" />
-        <span class="helper">Seamless live update from 0px to 40px.</span>
+        <input id="css-blur" type="range" min="0" max="50" step="1" value="20" />
+        <span class="helper">Seamless live update from 0px to 50px.</span>
+      </label>
+
+      <label>
+        Transition duration <span id="transition-duration-value">300ms</span>
+        <input id="transition-duration" type="range" min="0" max="14" step="1" value="6" />
+        <span class="helper">Hover animation duration in steps of 50ms (0-700ms).</span>
+      </label>
+
+      <label>
+        Transition easing
+        <select id="transition-easing">
+          <option value="linear">Linear</option>
+          <option value="ease-out" selected>Ease-out</option>
+          <option value="ease-in">Ease-in</option>
+          <option value="ease-in-out">Ease-in-out</option>
+        </select>
       </label>
 
       <div class="group wide quality-options">
@@ -326,18 +456,24 @@
       import { svgBlurImage } from "/2026/svgFilter2.js"
 
       const MODERN_VARIANTS = [
-        { id: "modern-webp-8", label: "webp @ 8px (next.js)", format: "webp", size: 8 },
-        { id: "modern-avif-8", label: "avif @ 8px", format: "avif", size: 8 },
+        {
+          id: "modern-webp-8",
+          label: "webp @ 8px (next.js)",
+          format: "webp",
+          size: 8,
+          defaultVisible: true
+        },
+        { id: "modern-avif-8", label: "avif @ 8px", format: "avif", size: 8, defaultVisible: true },
         {
           id: "modern-webp-16",
           label: "webp @ 16px",
           format: "webp",
           size: 16,
-          selected: true
+          defaultVisible: false
         },
-        { id: "modern-avif-16", label: "avif @ 16px", format: "avif", size: 16 },
-        { id: "modern-webp-32", label: "webp @ 32px", format: "webp", size: 32 },
-        { id: "modern-avif-32", label: "avif @ 32px", format: "avif", size: 32 }
+        { id: "modern-avif-16", label: "avif @ 16px", format: "avif", size: 16, defaultVisible: true },
+        { id: "modern-webp-32", label: "webp @ 32px", format: "webp", size: 32, defaultVisible: false },
+        { id: "modern-avif-32", label: "avif @ 32px", format: "avif", size: 32, defaultVisible: false }
       ]
 
       const STATIC_VARIANTS = [
@@ -445,6 +581,12 @@
         params.set("sharpBlurLevel", state.sharpBlurLevel)
         params.set("sharpBlurTarget", state.sharpBlurTarget)
         params.set("cssBlurPx", String(state.cssBlurPx))
+        params.set("transitionDuration", String(state.transitionDuration))
+        params.set("transitionEasing", state.transitionEasing)
+        params.set("useGlobalBlur", state.useGlobalBlur !== false ? "1" : "0")
+        if (state.perColumnBlur) {
+          params.set("perColumnBlur", JSON.stringify(state.perColumnBlur))
+        }
 
         params.set("avifLossless", state.avifLossless ? "1" : "0")
         params.set("avifChromaSubsampling", state.avifChromaSubsampling444 ? "444" : "420")
@@ -502,6 +644,30 @@
         }
 
         state.cssBlurPx = parseIntQuery(params.get("cssBlurPx"), state.cssBlurPx, 0, 40)
+        state.transitionDuration = parseIntQuery(
+          params.get("transitionDuration"),
+          state.transitionDuration,
+          0,
+          700
+        )
+        // Round to nearest 50ms step
+        state.transitionDuration = Math.round(state.transitionDuration / 50) * 50
+        const transitionEasing = params.get("transitionEasing")
+        if (
+          transitionEasing &&
+          ["linear", "ease-out", "ease-in", "ease-in-out"].includes(transitionEasing)
+        ) {
+          state.transitionEasing = transitionEasing
+        }
+        state.useGlobalBlur = parseBooleanQuery(params.get("useGlobalBlur"), state.useGlobalBlur ?? true)
+        const perColumnBlurParam = params.get("perColumnBlur")
+        if (perColumnBlurParam) {
+          try {
+            state.perColumnBlur = JSON.parse(perColumnBlurParam)
+          } catch (e) {
+            // Invalid JSON, ignore
+          }
+        }
         state.avifLossless = parseBooleanQuery(
           params.get("avifLossless"),
           state.avifLossless
@@ -720,24 +886,32 @@
         return `data:image/svg+xml,${svg.replaceAll("#", "%23").replaceAll("'", "%27").replaceAll('"', "%22")}`
       }
 
-      async function applyBlurPresentation(wrapper, sourceEl, image, state) {
+      async function applyBlurPresentation(wrapper, sourceEl, image, state, variantId = null) {
         const renderToken = String(Number(wrapper.dataset.blurRenderToken || "0") + 1)
         wrapper.dataset.blurRenderToken = renderToken
         clearBlurPresentation(wrapper, sourceEl)
-        if (state.cssBlurPx <= 0) return
+
+        // Determine which blur value to use
+        const useGlobalBlur = state.useGlobalBlur ?? true
+        let blurPx = state.cssBlurPx
+        if (!useGlobalBlur && variantId && state.perColumnBlur?.[variantId] !== undefined) {
+          blurPx = state.perColumnBlur[variantId]
+        }
+
+        if (blurPx <= 0) return
 
         const blurMode = normalizeBlurMode(state.blurMode)
         if (blurMode === "sharp") return
 
         if (blurMode === "backdrop") {
           wrapper.classList.add("preview-wrapper-lqip")
-          wrapper.style.setProperty("--css-blur", `${state.cssBlurPx}px`)
+          wrapper.style.setProperty("--css-blur", `${blurPx}px`)
           return
         }
 
         if (blurMode === "filter") {
           sourceEl.dataset.cssFilter = "1"
-          applyCssBlur(sourceEl, state.cssBlurPx)
+          applyCssBlur(sourceEl, blurPx)
           return
         }
 
@@ -749,7 +923,7 @@
         if (blurMode === "svg-filter-css") {
           const overlay = document.createElement("div")
           overlay.className = "blur-overlay"
-          setSvgFilterBlurAmount(state.cssBlurPx)
+          setSvgFilterBlurAmount(blurPx)
           const encodedSvg = svgBlurImage(
             sourceDataUrl,
             image.dimensions.width,
@@ -758,7 +932,7 @@
           )
           overlay.style.backgroundImage = encodeSVGForCSS(encodedSvg)
           overlay.style.filter = "url(#svgBlur)"
-          overlay.style.transform = `scale(${1 + state.cssBlurPx * 0.02})`
+          overlay.style.transform = `scale(${1 + blurPx * 0.02})`
           if (wrapper.dataset.blurRenderToken !== renderToken) return
           wrapper.appendChild(overlay)
           return
@@ -769,13 +943,14 @@
               sourceDataUrl,
               image.dimensions.width,
               image.dimensions.height,
-              state.cssBlurPx
+              blurPx
           )
 
           if (wrapper.dataset.blurRenderToken !== renderToken) return
           const nextSrc = encodeSVGForURL(encodedSvg)
           await decodeImageSrc(nextSrc).catch(() => undefined)
           if (wrapper.dataset.blurRenderToken !== renderToken) return
+          sourceEl.dataset.blurredSrc = nextSrc
           sourceEl.src = nextSrc
           return
         }
@@ -788,12 +963,13 @@
             blurHeight: image.dimensions.height,
             blurDataURL: sourceDataUrl,
             objectFit: "cover",
-            blurStd: state.cssBlurPx
+            blurStd: blurPx
           })
           if (wrapper.dataset.blurRenderToken !== renderToken) return
           const nextSrc = encodeSVGForURL(nextjsSvg)
           await decodeImageSrc(nextSrc).catch(() => undefined)
           if (wrapper.dataset.blurRenderToken !== renderToken) return
+          sourceEl.dataset.blurredSrc = nextSrc
           sourceEl.src = nextSrc
         }
       }
@@ -803,12 +979,152 @@
         document.querySelector("#rows").innerHTML = ""
       }
 
-      function renderHeader(visibleVariants) {
+      function renderHeader(visibleVariants, state) {
         const headerRow = document.querySelector("#header-row")
+        headerRow.innerHTML = ""
         for (const variant of visibleVariants) {
           const th = document.createElement("th")
-          th.textContent = variant.label
           if (variant.selected) th.classList.add("selected")
+
+          const headerContent = document.createElement("div")
+          headerContent.className = "column-header-content"
+
+          const title = document.createElement("div")
+          title.className = "column-header-title"
+          title.textContent = variant.label
+          headerContent.appendChild(title)
+
+          // Skip blur controls for thumbnail, css-lqip, and blurhash columns
+          if (
+            variant.id === "thumbnail" ||
+            variant.id === "css-lqip" ||
+            variant.id === "blurhash-as-css-gradient" ||
+            variant.id === "blurhash-as-css"
+          ) {
+            th.appendChild(headerContent)
+            headerRow.appendChild(th)
+            continue
+          }
+
+          const blurControls = document.createElement("div")
+          blurControls.className = "column-blur-controls"
+
+          const toggle = document.createElement("button")
+          toggle.className = "column-blur-toggle"
+          toggle.type = "button"
+          toggle.dataset.variantId = variant.id
+          const isGlobalBlur = state.useGlobalBlur ?? true
+
+          // Function to update button text
+          const updateToggleText = () => {
+            const currentBlur = isGlobalBlur ? state.cssBlurPx : (state.perColumnBlur?.[variant.id] ?? state.cssBlurPx)
+            toggle.textContent = `${currentBlur}px`
+          }
+          updateToggleText()
+
+          if (!isGlobalBlur) {
+            toggle.classList.add("active")
+          }
+          toggle.addEventListener("click", () => {
+            const currentGlobal = state.useGlobalBlur ?? true
+            if (currentGlobal) {
+              // Switch to per-column mode
+              state.useGlobalBlur = false
+              document.querySelectorAll(".column-blur-toggle").forEach((t) => {
+                t.classList.add("active")
+                const variantId = t.dataset.variantId
+                const blurValue = state.perColumnBlur?.[variantId] ?? state.cssBlurPx
+                t.textContent = `${blurValue}px`
+              })
+              document.querySelectorAll(".column-blur-slider").forEach((s) => (s.disabled = false))
+            } else {
+              // Switch back to global mode
+              state.useGlobalBlur = true
+              document.querySelectorAll(".column-blur-toggle").forEach((t) => {
+                t.classList.remove("active")
+                t.textContent = `${state.cssBlurPx}px`
+              })
+              document.querySelectorAll(".column-blur-slider").forEach((s) => (s.disabled = true))
+            }
+            syncQueryParams(state)
+            // Trigger re-render of blur
+            const currentVisibleVariants = getVisibleVariants(state)
+            const wrappers = document.querySelectorAll('.preview-wrapper[data-modern-cell="1"]')
+            for (const wrapper of wrappers) {
+              const sourceEl = wrapper.querySelector("img.preview")
+              if (!sourceEl) continue
+              const width = Number(wrapper.dataset.imageWidth)
+              const height = Number(wrapper.dataset.imageHeight)
+              if (!Number.isFinite(width) || !Number.isFinite(height)) continue
+              const cell = wrapper.closest("td")
+              const row = cell?.closest("tr")
+              if (!cell || !row) continue
+              const cellIndex = Array.from(row.querySelectorAll("td")).indexOf(cell)
+              const variantId = cellIndex >= 0 && cellIndex < currentVisibleVariants.length
+                ? currentVisibleVariants[cellIndex]?.id
+                : null
+              void applyBlurPresentation(
+                wrapper,
+                sourceEl,
+                { dimensions: { width, height } },
+                state,
+                variantId
+              )
+            }
+          })
+          blurControls.appendChild(toggle)
+
+          const slider = document.createElement("input")
+          slider.type = "range"
+          slider.className = "column-blur-slider"
+          slider.min = "0"
+          slider.max = "50"
+          slider.step = "1"
+          slider.dataset.variantId = variant.id
+          const columnBlur = state.perColumnBlur?.[variant.id] ?? state.cssBlurPx
+          slider.value = String(columnBlur)
+          slider.disabled = isGlobalBlur
+          slider.addEventListener("input", () => {
+            if (!state.perColumnBlur) {
+              state.perColumnBlur = {}
+            }
+            state.perColumnBlur[variant.id] = Number(slider.value)
+            toggle.textContent = `${slider.value}px`
+            syncQueryParams(state)
+            // Update blur for this column only
+            const currentVisibleVariants = getVisibleVariants(state)
+            const variantIndex = currentVisibleVariants.findIndex((v) => v.id === variant.id)
+            if (variantIndex !== -1) {
+              const rows = document.querySelectorAll("#rows > tr")
+              for (const row of rows) {
+                const cells = row.querySelectorAll("td")
+                const cell = cells[variantIndex]
+                if (cell) {
+                  const wrapper = cell.querySelector('.preview-wrapper[data-modern-cell="1"]')
+                  if (wrapper) {
+                    const sourceEl = wrapper.querySelector("img.preview")
+                    if (sourceEl) {
+                      const width = Number(wrapper.dataset.imageWidth)
+                      const height = Number(wrapper.dataset.imageHeight)
+                      if (Number.isFinite(width) && Number.isFinite(height)) {
+                        void applyBlurPresentation(
+                          wrapper,
+                          sourceEl,
+                          { dimensions: { width, height } },
+                          state,
+                          variant.id
+                        )
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          })
+          blurControls.appendChild(slider)
+
+          headerContent.appendChild(blurControls)
+          th.appendChild(headerContent)
           headerRow.appendChild(th)
         }
       }
@@ -862,7 +1178,7 @@
         }
       }
 
-      function renderStaticCell(cell, image, variant, result, state, row) {
+      function renderStaticCell(cell, image, variant, result, state, row, thumbnailSrc) {
         const wrapper = document.createElement("div")
         wrapper.className = "preview-wrapper"
         wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
@@ -885,16 +1201,37 @@
           preview.className = "css-lqip-preview"
           preview.style.setProperty("--lqip", result.lqip)
           const img = document.createElement("img")
+          img.className = "preview"
           img.src = `processed/${image.thumbnail.name}`
           img.alt = `${image.filename}-css-lqip`
           preview.appendChild(img)
           wrapper.appendChild(preview)
+
+          // Create thumbnail overlay for hover effect
+          if (thumbnailSrc) {
+            const thumbnailOverlay = document.createElement("img")
+            thumbnailOverlay.className = "preview thumbnail-overlay"
+            thumbnailOverlay.src = thumbnailSrc
+            thumbnailOverlay.alt = `Thumbnail for ${image.filename}`
+            wrapper.appendChild(thumbnailOverlay)
+          }
+
           setSizeLabel(sizeLabel, result.sizeBytes)
         } else {
           const preview = document.createElement("div")
           preview.className = "css-preview"
           preview.setAttribute("style", result.css)
           wrapper.appendChild(preview)
+
+          // Create thumbnail overlay for hover effect (blurhash variants)
+          if (thumbnailSrc && (variant.id === "blurhash-as-css-gradient" || variant.id === "blurhash-as-css")) {
+            const thumbnailOverlay = document.createElement("img")
+            thumbnailOverlay.className = "preview thumbnail-overlay"
+            thumbnailOverlay.src = thumbnailSrc
+            thumbnailOverlay.alt = `Thumbnail for ${image.filename}`
+            wrapper.appendChild(thumbnailOverlay)
+          }
+
           setSizeLabel(sizeLabel, result.sizeBytes)
         }
 
@@ -902,7 +1239,7 @@
         cell.appendChild(sizeLabel)
       }
 
-      function renderModernCell(cell, image, variant, state, row) {
+      function renderModernCell(cell, image, variant, state, row, thumbnailSrc) {
         const wrapper = document.createElement("div")
         wrapper.className = "preview-wrapper is-loading"
         wrapper.dataset.modernCell = "1"
@@ -913,9 +1250,19 @@
         img.className = "preview"
         img.alt = `${image.filename}-${variant.id}`
         wrapper.appendChild(img)
+
+        // Create thumbnail overlay for hover effect
+        if (thumbnailSrc) {
+          const thumbnailOverlay = document.createElement("img")
+          thumbnailOverlay.className = "preview thumbnail-overlay"
+          thumbnailOverlay.src = thumbnailSrc
+          thumbnailOverlay.alt = `Thumbnail for ${image.filename}`
+          wrapper.appendChild(thumbnailOverlay)
+        }
+
         const sizeLabel = createSizeLabel()
 
-        void applyBlurPresentation(wrapper, img, image, state)
+        void applyBlurPresentation(wrapper, img, image, state, variant.id)
 
         const url = modernUrl(image, variant, state)
         loadModernPreview(url)
@@ -923,12 +1270,27 @@
             await decodeImageSrc(objectUrl).catch(() => undefined)
             img.dataset.baseSrc = objectUrl
             img.src = objectUrl
-            void applyBlurPresentation(wrapper, img, image, state)
+            void applyBlurPresentation(wrapper, img, image, state, variant.id)
             const displayStrippedBytes =
               variant.format === "avif" ? strippedBytes : null
             setSizeLabel(sizeLabel, sizeBytes, displayStrippedBytes)
             wrapper.classList.remove("is-loading")
             updateRowTrophy(row)
+
+            // Setup hover handlers to fade out blur
+            const blurredSrc = img.dataset.blurredSrc
+            if (blurredSrc && img.src === blurredSrc) {
+              wrapper.addEventListener("mouseenter", () => {
+                if (img.dataset.baseSrc) {
+                  img.src = img.dataset.baseSrc
+                }
+              })
+              wrapper.addEventListener("mouseleave", () => {
+                if (blurredSrc) {
+                  img.src = blurredSrc
+                }
+              })
+            }
           })
           .catch((error) => {
             sizeLabel.textContent = error.message
@@ -947,18 +1309,20 @@
         for (const [index, image] of images.entries()) {
           const row = document.createElement("tr")
           row.id = getRowAnchorId(image, index)
+          const thumbnailResult = getStaticResult(image, "thumbnail")
+          const thumbnailSrc = thumbnailResult ? `processed/${thumbnailResult.name}` : null
           for (const variant of visibleVariants) {
             const cell = document.createElement("td")
             if (variant.selected) cell.classList.add("selected")
 
             if (variant.format) {
-              renderModernCell(cell, image, variant, state, row)
+              renderModernCell(cell, image, variant, state, row, thumbnailSrc)
             } else {
               const result = getStaticResult(image, variant.id)
               if (!result) {
                 cell.textContent = "-"
               } else {
-                renderStaticCell(cell, image, variant, result, state, row)
+                renderStaticCell(cell, image, variant, result, state, row, thumbnailSrc)
               }
             }
 
@@ -972,8 +1336,19 @@
       function renderTable(images, state) {
         const visibleVariants = getVisibleVariants(state)
         clearTable()
-        renderHeader(visibleVariants)
+        renderHeader(visibleVariants, state)
         renderRows(images, visibleVariants, state)
+      }
+
+      function updateTransitionCSS(state) {
+        document.documentElement.style.setProperty(
+          "--transition-duration",
+          `${state.transitionDuration}ms`
+        )
+        document.documentElement.style.setProperty(
+          "--transition-easing",
+          state.transitionEasing
+        )
       }
 
       function setupVisibilityControls(state, onChange) {
@@ -1038,6 +1413,16 @@
         cssBlurEl.value = String(state.cssBlurPx)
         cssBlurValueEl.textContent = `${state.cssBlurPx}px`
 
+        const transitionDurationEl = document.querySelector("#transition-duration")
+        const transitionDurationValueEl = document.querySelector("#transition-duration-value")
+        const transitionEasingEl = document.querySelector("#transition-easing")
+
+        // Convert duration from ms to step (0-14 for 0-700ms in 50ms steps)
+        const durationStep = Math.round(state.transitionDuration / 50)
+        transitionDurationEl.value = String(Math.max(0, Math.min(14, durationStep)))
+        transitionDurationValueEl.textContent = `${state.transitionDuration}ms`
+        transitionEasingEl.value = state.transitionEasing
+
         avifLosslessEl.checked = state.avifLossless
         avifChroma444El.checked = state.avifChromaSubsampling444
         avifBitdepthEl.value = String(state.avifBitdepth)
@@ -1088,7 +1473,26 @@
         cssBlurEl.addEventListener("input", () => {
           state.cssBlurPx = Number(cssBlurEl.value)
           cssBlurValueEl.textContent = `${state.cssBlurPx}px`
+          // Update all column blur toggle buttons when in global mode
+          if (state.useGlobalBlur !== false) {
+            document.querySelectorAll(".column-blur-toggle").forEach((t) => {
+              t.textContent = `${state.cssBlurPx}px`
+            })
+          }
           onBlurChange()
+        })
+
+        transitionDurationEl.addEventListener("input", () => {
+          state.transitionDuration = Number(transitionDurationEl.value) * 50
+          transitionDurationValueEl.textContent = `${state.transitionDuration}ms`
+          updateTransitionCSS(state)
+          syncQueryParams(state)
+        })
+
+        transitionEasingEl.addEventListener("change", () => {
+          state.transitionEasing = transitionEasingEl.value
+          updateTransitionCSS(state)
+          syncQueryParams(state)
         })
 
         for (const [el, key] of [
@@ -1143,6 +1547,10 @@
             blurMode: normalizeBlurMode(defaults.blurMode),
             sharpBlurTarget: defaults.sharpBlurTarget,
             cssBlurPx: defaults.cssBlurPx,
+            transitionDuration: defaults.transitionDuration ?? 300,
+            transitionEasing: defaults.transitionEasing ?? "ease-out",
+            useGlobalBlur: defaults.useGlobalBlur ?? true,
+            perColumnBlur: defaults.perColumnBlur ?? {},
             avifLossless: defaults.avifLossless,
             avifChromaSubsampling444: defaults.avifChromaSubsampling444,
             avifBitdepth: defaults.avifBitdepth,
@@ -1159,6 +1567,7 @@
           }
 
           hydrateStateFromQuery(state, controlsConfig)
+          updateTransitionCSS(state)
 
           const rerender = (syncQuery = false) => {
             renderTable(images, state)
@@ -1167,6 +1576,7 @@
             }
           }
           const updateRenderedBlurOnly = () => {
+            const visibleVariants = getVisibleVariants(state)
             const wrappers = document.querySelectorAll('.preview-wrapper[data-modern-cell="1"]')
             for (const wrapper of wrappers) {
               const sourceEl = wrapper.querySelector("img.preview")
@@ -1174,11 +1584,19 @@
               const width = Number(wrapper.dataset.imageWidth)
               const height = Number(wrapper.dataset.imageHeight)
               if (!Number.isFinite(width) || !Number.isFinite(height)) continue
+              const cell = wrapper.closest("td")
+              const row = cell?.closest("tr")
+              if (!cell || !row) continue
+              const cellIndex = Array.from(row.querySelectorAll("td")).indexOf(cell)
+              const variantId = cellIndex >= 0 && cellIndex < visibleVariants.length
+                ? visibleVariants[cellIndex]?.id
+                : null
               void applyBlurPresentation(
                 wrapper,
                 sourceEl,
                 { dimensions: { width, height } },
-                state
+                state,
+                variantId
               )
             }
             syncQueryParams(state)
@@ -1193,6 +1611,65 @@
           rerender()
           statusEl.remove()
           tableEl.hidden = false
+
+          // Setup keyboard navigation for scroll snap
+          function getSnapPoints() {
+            const points = []
+            const h1 = document.querySelector("h1")
+            const controls = document.querySelector(".controls")
+            const rows = document.querySelectorAll("#rows > tr")
+            if (h1) points.push(h1)
+            if (controls) points.push(controls)
+            rows.forEach((row) => points.push(row))
+            return points
+          }
+
+          function findCurrentSnapPoint(snapPoints, useTop = false) {
+            const scrollY = useTop ? window.scrollY : window.scrollY + window.innerHeight / 2
+            for (let i = snapPoints.length - 1; i >= 0; i--) {
+              const rect = snapPoints[i].getBoundingClientRect()
+              const elementTop = rect.top + window.scrollY
+              if (elementTop <= scrollY) {
+                return i
+              }
+            }
+            return 0
+          }
+
+          function scrollToSnapPoint(snapPoints, index) {
+            if (index < 0 || index >= snapPoints.length) return
+            const target = snapPoints[index]
+            const rect = target.getBoundingClientRect()
+            const scrollMargin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0
+            const targetY = rect.top + window.scrollY - scrollMargin
+            window.scrollTo({ top: targetY, behavior: "smooth" })
+          }
+
+          document.addEventListener("keydown", (e) => {
+            // Only handle if not typing in an input/textarea/select
+            if (
+              e.target.tagName === "INPUT" ||
+              e.target.tagName === "TEXTAREA" ||
+              e.target.tagName === "SELECT"
+            ) {
+              return
+            }
+
+            if (e.key === "ArrowDown") {
+              e.preventDefault()
+              const snapPoints = getSnapPoints()
+              const currentIndex = findCurrentSnapPoint(snapPoints)
+              const nextIndex = Math.min(currentIndex + 1, snapPoints.length - 1)
+              scrollToSnapPoint(snapPoints, nextIndex)
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault()
+              const snapPoints = getSnapPoints()
+              // When scrolling up, use top of viewport to find current snap point
+              const currentIndex = findCurrentSnapPoint(snapPoints, true)
+              const prevIndex = Math.max(currentIndex - 1, 0)
+              scrollToSnapPoint(snapPoints, prevIndex)
+            }
+          })
         } catch (error) {
           statusEl.className = "error"
           statusEl.textContent = `Error loading comparison data: ${error.message}`
