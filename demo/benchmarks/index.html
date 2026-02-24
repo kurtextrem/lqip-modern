@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Benchmark Preview</title>
+		<style>
+			:root { color-scheme: dark; font-family: system-ui, sans-serif; }
+			* { box-sizing: border-box; }
+			body { margin: 0; background: #0a0d13; color: #e0e4ec; }
+			header { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid rgba(130,150,190,.2); }
+			header h1 { margin: 0 0 .25rem; font-size: 1.15rem; }
+			header p { margin: 0; font-size: .82rem; color: #8e9ab4; }
+			main { max-width: 960px; margin: 0 auto; padding: 1.5rem 2rem; }
+			h2 { font-size: .88rem; margin: 1.6rem 0 .6rem; color: #b0bdd6; text-transform: uppercase; letter-spacing: .04em; }
+			.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .5rem; }
+			.grid a {
+				display: flex; align-items: center; gap: .6rem;
+				padding: .55rem .75rem; border-radius: 8px; text-decoration: none; color: #d0d8ec;
+				border: 1px solid rgba(120,140,190,.18); background: rgba(18,24,38,.6);
+				font-size: .78rem; transition: border-color .15s, background .15s;
+			}
+			.grid a:hover { border-color: rgba(100,140,255,.45); background: rgba(28,38,62,.7); }
+			.tag { padding: .15rem .4rem; border-radius: 4px; font-size: .68rem; background: rgba(80,120,220,.18); color: #8ab4ff; white-space: nowrap; }
+			.label { flex: 1; font-weight: 500; }
+			.tip { margin-top: 2rem; padding: 1rem; border-radius: 8px; background: rgba(60,120,220,.08); border: 1px solid rgba(80,130,220,.2); font-size: .78rem; color: #9ab0d4; line-height: 1.5; }
+			.tip code { background: rgba(255,255,255,.08); padding: .12rem .35rem; border-radius: 4px; font-size: .74rem; }
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>Benchmark Preview</h1>
+			<p>Open any variant in your browser to inspect performance with DevTools.</p>
+		</header>
+		<main id="root"></main>
+		<script>
+			const techniques = ["backdrop-filter", "filter", "nextjs-blur", "svg-blur", "svg-blur-css"];
+			const blurs = [10, 20, 40];
+			const cvModes = ["off", "auto"];
+			const pages = [
+				{ file: "reflow-paint-benchmark.html", label: "Reflow / Paint" },
+				{ file: "animation-benchmark.html", label: "Animation" },
+			];
+
+			const root = document.getElementById("root");
+
+			for (const page of pages) {
+				const h2 = document.createElement("h2");
+				h2.textContent = page.label;
+				root.append(h2);
+
+				const grid = document.createElement("div");
+				grid.className = "grid";
+
+				for (const technique of techniques) {
+					for (const blur of blurs) {
+						for (const cv of cvModes) {
+							const params = new URLSearchParams({ technique, blur, contentVisibility: cv });
+							const a = document.createElement("a");
+							a.href = `${page.file}?${params}`;
+							a.target = "_blank";
+							a.innerHTML = `
+								<span class="label">${technique}</span>
+								<span class="tag">blur ${blur}</span>
+								<span class="tag">cv ${cv}</span>
+							`;
+							grid.append(a);
+						}
+					}
+				}
+				root.append(grid);
+			}
+
+			const tip = document.createElement("div");
+			tip.className = "tip";
+			tip.innerHTML =
+				"<strong>Tip:</strong> Open Chrome DevTools → Performance tab → record while the benchmark runs. " +
+				"Each page runs its scenario automatically on load. " +
+				"Use <code>?technique=…&amp;blur=…&amp;contentVisibility=…</code> to customise any link.";
+			root.append(tip);
+		</script>
+	</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Reflow/Paint Blur Benchmark</title>
+	</head>
+	<body>
+		<script type="module">
+			import { runReflowPaintBenchmark } from "./benchmark-common.js";
+			try {
+				const { runtimeMs } = await runReflowPaintBenchmark();
+				window.tachometerResult = runtimeMs;
+			} catch (error) {
+				const detail = String(error && (error.stack || error.message || error));
+				window.__benchmarkError = detail;
+				window.tachometerResult = 1e12;
+				fetch("/api/benchmark-error", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ label: "reflow-paint", error: detail }),
+				}).catch(() => {});
+				throw error;
+			}
+		</script>
+	</body>
+</html>

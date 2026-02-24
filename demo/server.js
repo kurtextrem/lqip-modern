@@ -30,6 +30,61 @@ for (const file of fs.readdirSync(originalDir)) {
 const cache = new Map();
 fs.mkdirSync(processedDir, { recursive: true });
 
+// ---------------------------------------------------------------------------
+// Benchmark progress tracking
+// ---------------------------------------------------------------------------
+
+const bench = {
+	variants: new Map(),
+	errorCount: 0,
+	exitTimer: null,
+};
+
+function isBenchmarkRequest(pathname) {
+	return pathname.startsWith("/benchmarks/") && pathname.endsWith(".html");
+}
+
+function benchmarkLabel(params) {
+	const technique = params.get("technique") || "unknown";
+	const blur = params.get("blur") || "?";
+	const cv = params.get("contentVisibility") || "off";
+	return `${technique}-blur-${blur}-cv-${cv}`;
+}
+
+function logBenchmarkHit(url) {
+	const label = benchmarkLabel(url.searchParams);
+	const sample = (bench.variants.get(label) ?? 0) + 1;
+	bench.variants.set(label, sample);
+	const variantNum = [...bench.variants.keys()].indexOf(label) + 1;
+	const page = path.basename(url.pathname, ".html");
+	console.log(
+		`\x1b[36m[bench]\x1b[0m ${page}  \x1b[1m${label}\x1b[0m  (variant ${variantNum}, sample ${sample})`,
+	);
+}
+
+function logBenchmarkError(source, detail) {
+	bench.errorCount++;
+	console.error(`\x1b[31m[bench error]\x1b[0m ${source}: ${detail}`);
+	scheduleExitOnError();
+}
+
+function scheduleExitOnError() {
+	if (bench.exitTimer) return;
+	console.error(
+		"\x1b[31m[bench]\x1b[0m Terminating in 2 s due to benchmark error…",
+	);
+	bench.exitTimer = setTimeout(() => process.exit(1), 2000);
+}
+
+function readBody(req) {
+	return new Promise((resolve, reject) => {
+		const chunks = [];
+		req.on("data", (c) => chunks.push(c));
+		req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+		req.on("error", reject);
+	});
+}
+
 function defaultOptionState() {
 	return {
 		avifLossless: false,
@@ -298,10 +353,14 @@ async function handleModern(req, res, url) {
 	const cached = cache.get(cacheKey);
 	if (cached) {
 		if (format === "avif") {
-			res.setHeader(
-				"X-Avif-Stripped-Bytes",
-				String(stripAvifToHash(cached.buffer).length),
-			);
+			try {
+				res.setHeader(
+					"X-Avif-Stripped-Bytes",
+					String(stripAvifToHash(cached.buffer).length),
+				);
+			} catch {
+				// AVIF too small to strip, skip header
+			}
 		}
 		res.statusCode = 200;
 		res.setHeader("Content-Type", cached.contentType);
@@ -318,10 +377,14 @@ async function handleModern(req, res, url) {
 			contentType: contentTypeForPath(cacheFilePath),
 		});
 		if (format === "avif") {
-			res.setHeader(
-				"X-Avif-Stripped-Bytes",
-				String(stripAvifToHash(buffer).length),
-			);
+			try {
+				res.setHeader(
+					"X-Avif-Stripped-Bytes",
+					String(stripAvifToHash(buffer).length),
+				);
+			} catch {
+				// AVIF too small to strip, skip header
+			}
 		}
 		res.statusCode = 200;
 		res.setHeader("Content-Type", contentTypeForPath(cacheFilePath));
@@ -369,16 +432,26 @@ async function handleModern(req, res, url) {
 
 	let buffer = await output.toBuffer();
 	if (format === "avif") {
-		const strippedBytes = stripAvifToHash(buffer).length;
-		res.setHeader("X-Avif-Stripped-Bytes", String(strippedBytes));
+		try {
+			const strippedBytes = stripAvifToHash(buffer).length;
+			res.setHeader("X-Avif-Stripped-Bytes", String(strippedBytes));
+		} catch {
+			// AVIF too small to strip, skip header
+		}
 	}
 
 	if (format === "avifhash") {
-		const fullAvifBytes = buffer.length;
-		buffer = stripAvifToHash(buffer);
-		res.setHeader("X-Avif-Stripped-Bytes", String(buffer.length));
-		res.setHeader("X-AvifHash-Bytes", String(buffer.length));
-		res.setHeader("X-Avif-Bytes", String(fullAvifBytes));
+		try {
+			const fullAvifBytes = buffer.length;
+			buffer = stripAvifToHash(buffer);
+			res.setHeader("X-Avif-Stripped-Bytes", String(buffer.length));
+			res.setHeader("X-AvifHash-Bytes", String(buffer.length));
+			res.setHeader("X-Avif-Bytes", String(fullAvifBytes));
+		} catch (error) {
+			res.statusCode = 400;
+			res.end("AVIF too small to generate avifhash payload");
+			return;
+		}
 	}
 	cache.set(cacheKey, { buffer, contentType });
 	await fs.promises.writeFile(cacheFilePath, buffer);
@@ -408,7 +481,14 @@ function serveStatic(req, res, url) {
 	if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
 		res.statusCode = 404;
 		res.end("Not found");
+		if (bench.variants.size > 0) {
+			logBenchmarkError("404", pathname);
+		}
 		return;
+	}
+
+	if (isBenchmarkRequest(normalizedPath)) {
+		logBenchmarkHit(url);
 	}
 
 	res.statusCode = 200;
@@ -424,14 +504,34 @@ const server = http.createServer(async (req, res) => {
 			return;
 		}
 
+		if (url.pathname === "/api/benchmark-error" && req.method === "POST") {
+			const body = await readBody(req);
+			try {
+				const { label, error: errMsg } = JSON.parse(body);
+				logBenchmarkError(label || "client", errMsg || body);
+			} catch {
+				logBenchmarkError("client", body);
+			}
+			res.statusCode = 204;
+			res.end();
+			return;
+		}
+
 		serveStatic(req, res, url);
 	} catch (error) {
 		res.statusCode = 500;
 		res.setHeader("Content-Type", "text/plain; charset=utf-8");
 		res.end(`Server error: ${error.message}`);
+		logBenchmarkError("server", error.message);
 	}
 });
 
 server.listen(port, host, () => {
 	console.log(`Demo server running at http://${host}:${port}`);
+	if (process.argv.includes("--bench-preview")) {
+		console.log(
+			`\nBenchmark preview: \x1b[4mhttp://${host}:${port}/benchmarks/index.html\x1b[0m`,
+		);
+		console.log("Open any variant to inspect performance with DevTools.\n");
+	}
 });

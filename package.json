@@ -27,6 +27,14 @@
     "test:format": "prettier '**/*.{js,json,ts}' --check",
     "demo:generate": "node demo/generate-comparison-data.js",
     "demo": "node demo/server.js",
+    "bench:preview": "node demo/server.js --bench-preview",
+    "bench:generate-configs": "node demo/benchmarks/generate-configs.mjs",
+    "bench:reflow": "pnpm bench:generate-configs && tachometer --config demo/benchmarks/tachometer-reflow.json --json-file demo/benchmarks/results/reflow-results.json --csv-file demo/benchmarks/results/reflow-stats.csv --csv-file-raw demo/benchmarks/results/reflow-raw.csv",
+    "bench:animation": "pnpm bench:generate-configs && tachometer --config demo/benchmarks/tachometer-animation.json --json-file demo/benchmarks/results/animation-results.json --csv-file demo/benchmarks/results/animation-stats.csv --csv-file-raw demo/benchmarks/results/animation-raw.csv",
+    "bench:reflow:server": "BENCH_BASE_URL=http://127.0.0.1:3000 pnpm bench:reflow",
+    "bench:animation:server": "BENCH_BASE_URL=http://127.0.0.1:3000 pnpm bench:animation",
+    "bench:analyze:reflow": "node demo/benchmarks/analyze-traces.mjs --trace-dir demo/benchmarks/results/reflow-traces --output demo/benchmarks/results/reflow-trace-summary.json",
+    "bench:analyze:animation": "node demo/benchmarks/analyze-traces.mjs --trace-dir demo/benchmarks/results/animation-traces --output demo/benchmarks/results/animation-trace-summary.json",
     "deploy": "gh-pages -d demo"
   },
   "dependencies": {
@@ -49,6 +57,7 @@
     "npm-run-all2": "^7.0.0",
     "prettier": "^3.3.3",
     "serve": "^11.3.2",
+    "tachometer": "^0.7.2",
     "update-markdown-jsdoc": "^1.0.11"
   },
   "ava": {

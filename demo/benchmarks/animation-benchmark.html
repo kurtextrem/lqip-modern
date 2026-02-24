@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Animation Blur Benchmark</title>
+	</head>
+	<body>
+		<script type="module">
+			import { runAnimationBenchmark } from "./benchmark-common.js";
+			try {
+				const { runtimeMs, fps, avgFrameMs } = await runAnimationBenchmark();
+				window.tachometerResult = runtimeMs;
+				window.__benchmarkFps = fps;
+				window.__benchmarkAvgFrameMs = avgFrameMs;
+			} catch (error) {
+				const detail = String(error && (error.stack || error.message || error));
+				window.__benchmarkError = detail;
+				window.tachometerResult = 1e12;
+				window.__benchmarkFps = 0;
+				window.__benchmarkAvgFrameMs = 1e12;
+				fetch("/api/benchmark-error", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ label: "animation", error: detail }),
+				}).catch(() => {});
+				throw error;
+			}
+		</script>
+	</body>
+</html>

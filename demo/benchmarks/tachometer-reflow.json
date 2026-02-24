@@ -1,0 +1,1031 @@
+{
+  "$schema": "../../node_modules/tachometer/config.schema.json",
+  "root": "../..",
+  "sampleSize": 12,
+  "timeout": 0,
+  "autoSampleConditions": [
+    "0%"
+  ],
+  "benchmarks": [
+    {
+      "name": "backdrop-filter-blur-10-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-10-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=10&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-20-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-20-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=20&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-40-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "backdrop-filter-blur-40-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=backdrop-filter&blur=40&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-10-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=10&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-10-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=10&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-20-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=20&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-20-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=20&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-40-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=40&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "filter-blur-40-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=filter&blur=40&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-10-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-10-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=10&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-20-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-20-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=20&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-40-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "nextjs-blur-blur-40-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=nextjs-blur&blur=40&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-10-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=10&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-10-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=10&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-20-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=20&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-20-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=20&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-40-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=40&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-blur-40-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur&blur=40&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-10-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-10-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=10&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-20-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-20-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=20&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-40-cv-off",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=off",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    },
+    {
+      "name": "svg-blur-css-blur-40-cv-auto",
+      "url": "reflow-paint-benchmark.html?technique=svg-blur-css&blur=40&contentVisibility=auto",
+      "measurement": {
+        "mode": "expression",
+        "name": "runtime-ms",
+        "expression": "window.tachometerResult"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true,
+        "windowSize": {
+          "width": 1440,
+          "height": 900
+        },
+        "trace": {
+          "logDir": "demo/benchmarks/results/reflow-traces",
+          "categories": [
+            "blink",
+            "blink.user_timing",
+            "cc",
+            "devtools.timeline",
+            "disabled-by-default-devtools.timeline",
+            "disabled-by-default-devtools.timeline.frame",
+            "disabled-by-default-devtools.timeline.layers",
+            "disabled-by-default-devtools.timeline.picture",
+            "gpu",
+            "renderer.scheduler",
+            "toplevel",
+            "viz"
+          ]
+        }
+      }
+    }
+  ]
+}
