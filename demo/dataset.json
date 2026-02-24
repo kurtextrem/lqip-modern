@@ -12,6 +12,7 @@
       70,
       75,
       80,
+      85,
       90,
       100
     ],
@@ -42,7 +43,7 @@
       "original"
     ],
     "defaults": {
-      "webpQuality": 70,
+      "webpQuality": 85,
       "avifQuality": 70,
       "sharpBlurLevel": "0",
       "blurMode": "css",

@@ -62,10 +62,12 @@ function logBenchmarkHit(url) {
 	);
 }
 
-function logBenchmarkError(source, detail) {
+function logBenchmarkError(source, detail, { fatal = false } = {}) {
 	bench.errorCount++;
 	console.error(`\x1b[31m[bench error]\x1b[0m ${source}: ${detail}`);
-	scheduleExitOnError();
+	if (fatal) {
+		scheduleExitOnError();
+	}
 }
 
 function scheduleExitOnError() {
@@ -482,7 +484,7 @@ function serveStatic(req, res, url) {
 		res.statusCode = 404;
 		res.end("Not found");
 		if (bench.variants.size > 0) {
-			logBenchmarkError("404", pathname);
+			logBenchmarkError("404", pathname, { fatal: true });
 		}
 		return;
 	}
@@ -508,9 +510,9 @@ const server = http.createServer(async (req, res) => {
 			const body = await readBody(req);
 			try {
 				const { label, error: errMsg } = JSON.parse(body);
-				logBenchmarkError(label || "client", errMsg || body);
+				logBenchmarkError(label || "client", errMsg || body, { fatal: true });
 			} catch {
-				logBenchmarkError("client", body);
+				logBenchmarkError("client", body, { fatal: true });
 			}
 			res.statusCode = 204;
 			res.end();
