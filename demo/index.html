@@ -382,6 +382,48 @@
         </select>
       </label>
 
+      <div class="group wide">
+        <strong>Runtime hash options</strong>
+        <div class="checkbox-grid">
+          <label>
+            BlurHash input size <span id="blurhash-size-value">32</span>
+            <input id="blurhash-size" type="range" min="1" max="100" step="1" value="32" />
+          </label>
+          <label>
+            BlurHash components X
+            <select id="blurhash-components-x">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+          </label>
+          <label>
+            BlurHash components Y
+            <select id="blurhash-components-y">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+          </label>
+          <label>
+            ThumbHash input size <span id="thumbhash-size-value">32</span>
+            <input id="thumbhash-size" type="range" min="1" max="100" step="1" value="32" />
+          </label>
+        </div>
+      </div>
+
       <div class="group wide quality-options">
         <strong>Quality options</strong>
         <span class="helper"
@@ -454,6 +496,8 @@
     <script type="module">
       import { getImageBlurSvg } from "/2026/svgFilter.js"
       import { svgBlurImage } from "/2026/svgFilter2.js"
+      import { decode as decodeBlurhash } from "/node_modules/blurhash/dist/index.mjs"
+      import { thumbHashToDataURL } from "/node_modules/thumbhash/thumbhash.js"
 
       const MODERN_VARIANTS = [
         {
@@ -506,6 +550,22 @@
           label: "blurhash-as-css",
           type: "css",
           defaultVisible: false
+        },
+        {
+          id: "blurhash-runtime",
+          label: "blurhash (runtime)",
+          type: "hash-runtime",
+          hashKind: "blurhash",
+          hashSize: 32,
+          defaultVisible: false
+        },
+        {
+          id: "thumbhash-runtime",
+          label: "thumbhash (runtime)",
+          type: "hash-runtime",
+          hashKind: "thumbhash",
+          hashSize: 32,
+          defaultVisible: false
         }
       ]
 
@@ -513,6 +573,8 @@
 
       const modernPreviewCache = new Map()
       const imageDataUrlCache = new Map()
+      const runtimeHashCache = new Map()
+      const hashDataUrlCache = new Map()
       const qualityOptions = []
       const variantIds = new Set(VARIANTS.map((variant) => variant.id))
       const BLUR_MODES = new Set([
@@ -583,6 +645,10 @@
         params.set("cssBlurPx", String(state.cssBlurPx))
         params.set("transitionDuration", String(state.transitionDuration))
         params.set("transitionEasing", state.transitionEasing)
+        params.set("blurhashSize", String(state.blurhashSize))
+        params.set("blurhashComponentsX", String(state.blurhashComponentsX))
+        params.set("blurhashComponentsY", String(state.blurhashComponentsY))
+        params.set("thumbhashSize", String(state.thumbhashSize))
         params.set("useGlobalBlur", state.useGlobalBlur !== false ? "1" : "0")
         if (state.perColumnBlur) {
           params.set("perColumnBlur", JSON.stringify(state.perColumnBlur))
@@ -659,6 +725,20 @@
         ) {
           state.transitionEasing = transitionEasing
         }
+        state.blurhashSize = parseIntQuery(params.get("blurhashSize"), state.blurhashSize, 1, 100)
+        state.blurhashComponentsX = parseIntQuery(
+          params.get("blurhashComponentsX"),
+          state.blurhashComponentsX,
+          1,
+          9
+        )
+        state.blurhashComponentsY = parseIntQuery(
+          params.get("blurhashComponentsY"),
+          state.blurhashComponentsY,
+          1,
+          9
+        )
+        state.thumbhashSize = parseIntQuery(params.get("thumbhashSize"), state.thumbhashSize, 1, 100)
         state.useGlobalBlur = parseBooleanQuery(params.get("useGlobalBlur"), state.useGlobalBlur ?? true)
         const perColumnBlurParam = params.get("perColumnBlur")
         if (perColumnBlurParam) {
@@ -860,6 +940,76 @@
         return match ? match[2] : null
       }
 
+      function rgbaPixelsToDataUrl(width, height, pixels) {
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          throw new Error("Canvas 2D context unavailable")
+        }
+        const imageData = ctx.createImageData(width, height)
+        imageData.data.set(pixels)
+        ctx.putImageData(imageData, 0, 0)
+        return canvas.toDataURL()
+      }
+
+      function decodeBase64ToBytes(base64) {
+        const binary = atob(base64)
+        const bytes = new Uint8Array(binary.length)
+        for (let i = 0; i < binary.length; i += 1) {
+          bytes[i] = binary.charCodeAt(i)
+        }
+        return bytes
+      }
+
+      function runtimeHashToDataUrl(variantId, hash, width = 32, height = 32) {
+        const cacheKey = `${variantId}:${hash}:${width}x${height}`
+        const cached = hashDataUrlCache.get(cacheKey)
+        if (cached) return cached
+
+        let dataUrl
+        if (variantId === "blurhash-runtime") {
+          const pixels = decodeBlurhash(hash, width, height, 1)
+          dataUrl = rgbaPixelsToDataUrl(width, height, pixels)
+        } else {
+          const bytes = decodeBase64ToBytes(hash)
+          dataUrl = thumbHashToDataURL(bytes)
+        }
+
+        hashDataUrlCache.set(cacheKey, dataUrl)
+        return dataUrl
+      }
+
+      function runtimeHashUrl(image, variant, state) {
+        const params = new URLSearchParams()
+        params.set("image", image.filename)
+        params.set("kind", variant.hashKind)
+        if (variant.hashKind === "blurhash") {
+          params.set("size", String(state.blurhashSize))
+          params.set("componentsX", String(state.blurhashComponentsX))
+          params.set("componentsY", String(state.blurhashComponentsY))
+        } else {
+          params.set("size", String(state.thumbhashSize))
+        }
+        return `/api/hash?${params.toString()}`
+      }
+
+      async function loadRuntimeHash(url) {
+        const cached = runtimeHashCache.get(url)
+        if (cached) return cached
+
+        const promise = (async () => {
+          const response = await fetch(url)
+          if (!response.ok) {
+            throw new Error(`Request failed (${response.status})`)
+          }
+          return response.json()
+        })()
+        runtimeHashCache.set(url, promise)
+        return promise
+      }
+
       function clearBlurPresentation(wrapper, sourceEl) {
         wrapper.classList.remove("preview-wrapper-lqip")
         wrapper.style.removeProperty("--css-blur")
@@ -994,12 +1144,14 @@
           title.textContent = variant.label
           headerContent.appendChild(title)
 
-          // Skip blur controls for thumbnail, css-lqip, and blurhash columns
+          // Skip blur controls for thumbnail, css-lqip, and hash columns
           if (
             variant.id === "thumbnail" ||
             variant.id === "css-lqip" ||
             variant.id === "blurhash-as-css-gradient" ||
-            variant.id === "blurhash-as-css"
+            variant.id === "blurhash-as-css" ||
+            variant.id === "blurhash-runtime" ||
+            variant.id === "thumbhash-runtime"
           ) {
             th.appendChild(headerContent)
             headerRow.appendChild(th)
@@ -1223,8 +1375,12 @@
           preview.setAttribute("style", result.css)
           wrapper.appendChild(preview)
 
-          // Create thumbnail overlay for hover effect (blurhash variants)
-          if (thumbnailSrc && (variant.id === "blurhash-as-css-gradient" || variant.id === "blurhash-as-css")) {
+          // Create thumbnail overlay for hover effect (hash-based variants)
+          if (
+            thumbnailSrc &&
+            (variant.id === "blurhash-as-css-gradient" ||
+              variant.id === "blurhash-as-css")
+          ) {
             const thumbnailOverlay = document.createElement("img")
             thumbnailOverlay.className = "preview thumbnail-overlay"
             thumbnailOverlay.src = thumbnailSrc
@@ -1234,6 +1390,46 @@
 
           setSizeLabel(sizeLabel, result.sizeBytes)
         }
+
+        cell.appendChild(wrapper)
+        cell.appendChild(sizeLabel)
+      }
+
+      function renderRuntimeHashCell(cell, image, variant, state, row, thumbnailSrc) {
+        const wrapper = document.createElement("div")
+        wrapper.className = "preview-wrapper is-loading"
+        wrapper.style.paddingBottom = `${(image.dimensions.height / image.dimensions.width) * 100}%`
+        const img = document.createElement("img")
+        img.className = "preview"
+        img.alt = `${image.filename}-${variant.id}`
+        wrapper.appendChild(img)
+
+        if (thumbnailSrc) {
+          const thumbnailOverlay = document.createElement("img")
+          thumbnailOverlay.className = "preview thumbnail-overlay"
+          thumbnailOverlay.src = thumbnailSrc
+          thumbnailOverlay.alt = `Thumbnail for ${image.filename}`
+          wrapper.appendChild(thumbnailOverlay)
+        }
+
+        const sizeLabel = createSizeLabel()
+        const url = runtimeHashUrl(image, variant, state)
+        loadRuntimeHash(url)
+          .then(async ({ hash, sizeBytes, width, height }) => {
+            const dataUrl = runtimeHashToDataUrl(variant.id, hash, width, height)
+            await decodeImageSrc(dataUrl).catch(() => undefined)
+            img.src = dataUrl
+            setSizeLabel(sizeLabel, sizeBytes)
+            wrapper.classList.remove("is-loading")
+            updateRowTrophy(row)
+          })
+          .catch((error) => {
+            sizeLabel.textContent = error.message
+            delete sizeLabel.dataset.sizeBytes
+            delete sizeLabel.dataset.baseText
+            wrapper.classList.remove("is-loading")
+            updateRowTrophy(row)
+          })
 
         cell.appendChild(wrapper)
         cell.appendChild(sizeLabel)
@@ -1317,6 +1513,8 @@
 
             if (variant.format) {
               renderModernCell(cell, image, variant, state, row, thumbnailSrc)
+            } else if (variant.type === "hash-runtime") {
+              renderRuntimeHashCell(cell, image, variant, state, row, thumbnailSrc)
             } else {
               const result = getStaticResult(image, variant.id)
               if (!result) {
@@ -1416,12 +1614,24 @@
         const transitionDurationEl = document.querySelector("#transition-duration")
         const transitionDurationValueEl = document.querySelector("#transition-duration-value")
         const transitionEasingEl = document.querySelector("#transition-easing")
+        const blurhashSizeEl = document.querySelector("#blurhash-size")
+        const blurhashSizeValueEl = document.querySelector("#blurhash-size-value")
+        const blurhashComponentsXEl = document.querySelector("#blurhash-components-x")
+        const blurhashComponentsYEl = document.querySelector("#blurhash-components-y")
+        const thumbhashSizeEl = document.querySelector("#thumbhash-size")
+        const thumbhashSizeValueEl = document.querySelector("#thumbhash-size-value")
 
         // Convert duration from ms to step (0-14 for 0-700ms in 50ms steps)
         const durationStep = Math.round(state.transitionDuration / 50)
         transitionDurationEl.value = String(Math.max(0, Math.min(14, durationStep)))
         transitionDurationValueEl.textContent = `${state.transitionDuration}ms`
         transitionEasingEl.value = state.transitionEasing
+        blurhashSizeEl.value = String(state.blurhashSize)
+        blurhashSizeValueEl.textContent = String(state.blurhashSize)
+        blurhashComponentsXEl.value = String(state.blurhashComponentsX)
+        blurhashComponentsYEl.value = String(state.blurhashComponentsY)
+        thumbhashSizeEl.value = String(state.thumbhashSize)
+        thumbhashSizeValueEl.textContent = String(state.thumbhashSize)
 
         avifLosslessEl.checked = state.avifLossless
         avifChroma444El.checked = state.avifChromaSubsampling444
@@ -1494,6 +1704,24 @@
           updateTransitionCSS(state)
           syncQueryParams(state)
         })
+        blurhashSizeEl.addEventListener("input", () => {
+          state.blurhashSize = Number(blurhashSizeEl.value)
+          blurhashSizeValueEl.textContent = String(state.blurhashSize)
+          onChange()
+        })
+        blurhashComponentsXEl.addEventListener("change", () => {
+          state.blurhashComponentsX = Number(blurhashComponentsXEl.value)
+          onChange()
+        })
+        blurhashComponentsYEl.addEventListener("change", () => {
+          state.blurhashComponentsY = Number(blurhashComponentsYEl.value)
+          onChange()
+        })
+        thumbhashSizeEl.addEventListener("input", () => {
+          state.thumbhashSize = Number(thumbhashSizeEl.value)
+          thumbhashSizeValueEl.textContent = String(state.thumbhashSize)
+          onChange()
+        })
 
         for (const [el, key] of [
           [avifLosslessEl, "avifLossless"],
@@ -1547,6 +1775,10 @@
             blurMode: normalizeBlurMode(defaults.blurMode),
             sharpBlurTarget: defaults.sharpBlurTarget,
             cssBlurPx: defaults.cssBlurPx,
+            blurhashSize: defaults.blurhashSize ?? 32,
+            blurhashComponentsX: defaults.blurhashComponentsX ?? 4,
+            blurhashComponentsY: defaults.blurhashComponentsY ?? 3,
+            thumbhashSize: defaults.thumbhashSize ?? 32,
             transitionDuration: defaults.transitionDuration ?? 300,
             transitionEasing: defaults.transitionEasing ?? "ease-out",
             useGlobalBlur: defaults.useGlobalBlur ?? true,

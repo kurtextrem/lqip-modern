@@ -4,6 +4,8 @@ import http from "node:http";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { encode as encodeBlurhash } from "blurhash";
+import { rgbaToThumbHash } from "thumbhash";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +30,7 @@ for (const file of fs.readdirSync(originalDir)) {
 }
 
 const cache = new Map();
+const hashCache = new Map();
 fs.mkdirSync(processedDir, { recursive: true });
 
 // ---------------------------------------------------------------------------
@@ -206,6 +209,7 @@ function contentTypeForPath(filePath) {
 	const ext = path.extname(filePath).toLowerCase();
 	if (ext === ".html") return "text/html; charset=utf-8";
 	if (ext === ".js") return "application/javascript; charset=utf-8";
+	if (ext === ".mjs") return "application/javascript; charset=utf-8";
 	if (ext === ".css") return "text/css; charset=utf-8";
 	if (ext === ".json") return "application/json; charset=utf-8";
 	if (ext === ".svg") return "image/svg+xml";
@@ -449,7 +453,7 @@ async function handleModern(req, res, url) {
 			res.setHeader("X-Avif-Stripped-Bytes", String(buffer.length));
 			res.setHeader("X-AvifHash-Bytes", String(buffer.length));
 			res.setHeader("X-Avif-Bytes", String(fullAvifBytes));
-		} catch (error) {
+		} catch {
 			res.statusCode = 400;
 			res.end("AVIF too small to generate avifhash payload");
 			return;
@@ -465,13 +469,111 @@ async function handleModern(req, res, url) {
 	res.end(buffer);
 }
 
+async function handleHash(req, res, url) {
+	const filename = url.searchParams.get("image");
+	const originalPath = filename ? allowedOriginals.get(filename) : null;
+	if (!originalPath) {
+		res.statusCode = 400;
+		res.end("Invalid image");
+		return;
+	}
+
+	const kind = url.searchParams.get("kind");
+	if (!kind || !["blurhash", "thumbhash"].includes(kind)) {
+		res.statusCode = 400;
+		res.end("Invalid hash kind");
+		return;
+	}
+
+	const size = clampNumber(url.searchParams.get("size"), 1, 100, 32);
+	const blurhashComponentsX = clampNumber(
+		url.searchParams.get("componentsX"),
+		1,
+		9,
+		4,
+	);
+	const blurhashComponentsY = clampNumber(
+		url.searchParams.get("componentsY"),
+		1,
+		9,
+		3,
+	);
+	const cacheKey = JSON.stringify({
+		cacheVersion,
+		filename,
+		kind,
+		size,
+		blurhashComponentsX: kind === "blurhash" ? blurhashComponentsX : null,
+		blurhashComponentsY: kind === "blurhash" ? blurhashComponentsY : null,
+	});
+
+	const cached = hashCache.get(cacheKey);
+	if (cached) {
+		res.statusCode = 200;
+		res.setHeader("Content-Type", "application/json; charset=utf-8");
+		res.setHeader("X-Hash-Cache", "memory");
+		res.end(cached);
+		return;
+	}
+
+	const pixelData = await sharp(originalPath)
+		.rotate()
+		.ensureAlpha()
+		.resize(size, size, { fit: "inside" })
+		.raw()
+		.toBuffer({ resolveWithObject: true });
+	const rgba = new Uint8ClampedArray(pixelData.data);
+
+	let hash;
+	let sizeBytes;
+	if (kind === "blurhash") {
+		hash = encodeBlurhash(
+			rgba,
+			pixelData.info.width,
+			pixelData.info.height,
+			blurhashComponentsX,
+			blurhashComponentsY,
+		);
+		sizeBytes = Buffer.byteLength(hash);
+	} else {
+		const thumbhash = rgbaToThumbHash(
+			pixelData.info.width,
+			pixelData.info.height,
+			rgba,
+		);
+		hash = Buffer.from(thumbhash).toString("base64");
+		sizeBytes = thumbhash.length;
+	}
+
+	const payload = JSON.stringify({
+		kind,
+		hash,
+		sizeBytes,
+		width: pixelData.info.width,
+		height: pixelData.info.height,
+	});
+	hashCache.set(cacheKey, payload);
+
+	res.statusCode = 200;
+	res.setHeader("Content-Type", "application/json; charset=utf-8");
+	res.setHeader("X-Hash-Cache", "miss");
+	res.end(payload);
+}
+
 function serveStatic(req, res, url) {
 	let pathname = decodeURIComponent(url.pathname);
 	if (pathname === "/") pathname = "/index.html";
 	const projectRoot = path.resolve(__dirname, "..");
 	const normalizedPath = path.posix.normalize(pathname);
-	const rootDir = normalizedPath.startsWith("/2026/") ? projectRoot : __dirname;
-	const relativePath = normalizedPath.replace(/^\/+/, "");
+	let rootDir = __dirname;
+	let relativePath = normalizedPath.replace(/^\/+/, "");
+	if (
+		normalizedPath.startsWith("/2026/") ||
+		normalizedPath.startsWith("/node_modules/")
+	) {
+		rootDir = projectRoot;
+		relativePath = normalizedPath.slice(1); // keep path (e.g. "2026/...", "node_modules/...")
+	}
 	const filePath = path.resolve(rootDir, relativePath);
 	const allowedPrefix = `${rootDir}${path.sep}`;
 	if (filePath !== rootDir && !filePath.startsWith(allowedPrefix)) {
@@ -503,6 +605,11 @@ const server = http.createServer(async (req, res) => {
 		const url = new URL(req.url ?? "/", `http://${host}:${port}`);
 		if (url.pathname === "/api/modern") {
 			await handleModern(req, res, url);
+			return;
+		}
+
+		if (url.pathname === "/api/hash") {
+			await handleHash(req, res, url);
 			return;
 		}
 

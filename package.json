@@ -45,7 +45,8 @@
     "cssgip": "^1.0.4",
     "node-fetch": "^3.3.2",
     "p-map": "^7.0.2",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "thumbhash": "^0.1.1"
   },
   "devDependencies": {
     "@fisch0920/eslint-config": "^1.4.0",
